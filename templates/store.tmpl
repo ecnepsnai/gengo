@@ -1,0 +1,80 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+import (
+	"bytes"
+	"encoding/gob"
+	"time"
+
+	{{range $imp := .ExtraImports}}
+	"{{$imp}}"
+	{{end}}
+	"github.com/ecnepsnai/store"
+)
+
+{{range $store := .Stores}}
+type {{$store.LowercaseName}}StoreObject struct{ Store *store.Store }
+{{end}}
+
+{{range $store := .Stores}}
+// {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
+var {{$store.TitlecaseName}}Store = new({{$store.LowercaseName}}StoreObject)
+{{end}}
+
+// StoreSetup sets up all stores
+func StoreSetup() {
+	{{range $store := .Stores}}
+	{{$store.TitlecaseName}}Store.Store = newStore("{{$store.LowercaseName}}")
+	{{end}}
+	registerGobTypes()
+}
+func registerGobTypes() {
+	{{range $store := .Stores}}
+	{{range $gob := .Interfaces}}
+	gob.Register({{$gob}})
+	{{end}}
+	{{end}}
+}
+
+// StoreTeardown tears down all stores
+func StoreTeardown() {
+	{{range $store := .Stores}}
+	{{$store.TitlecaseName}}Store.Store.Close()
+	{{end}}
+}
+
+func newStore(storeName string) *store.Store {
+	s, err := store.New(Directories.Data, storeName)
+	if err != nil {
+		log.Fatal("Error opening %s store: %s", storeName, err.Error())
+	}
+	return s
+}
+
+{{range $store := .Stores}}
+{{range $gob := .Gobs}}
+func (s *{{$store.LowercaseName}}StoreObject) encode{{$gob.Name}}(o {{$gob.Type}}) ([]byte, error) {
+	var buf bytes.Buffer
+	err := gob.NewEncoder(&buf).Encode(o)
+	if err != nil {
+		log.Error("Error encoding {{$gob.Type}} type: %s", err.Error())
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+func (s *{{$store.LowercaseName}}StoreObject) decode{{$gob.Name}}(data []byte) (*{{$gob.Type}}, error) {
+	w := new({{$gob.Type}})
+
+	reader := bytes.NewReader(data)
+	dec := gob.NewDecoder(reader)
+	if err := dec.Decode(&w); err != nil {
+		log.Error("Error decoding {{$gob.Type}} type: %s", err.Error())
+		return nil, err
+	}
+	return w, nil
+}
+{{end}}
+{{end}}
+{{end}}

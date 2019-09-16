@@ -1,0 +1,9 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+// {{.AppName}}Version the version of {{.PackageName}}
+var {{.AppName}}Version = "{{.AppVersion}}"
+
+{{end}}

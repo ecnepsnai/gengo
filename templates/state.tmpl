@@ -1,0 +1,83 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+import (
+	"bytes"
+	"encoding/gob"
+
+	"github.com/ecnepsnai/store"
+)
+
+type stateObject struct {
+	store *store.Store
+}
+
+// State the global state object
+var State *stateObject
+
+// StateSetup load the saved state
+func StateSetup() {
+	s, err := store.New(Directories.Data, "state")
+	if err != nil {
+		log.Fatal("Error opening state store: %s", err.Error())
+	}
+	state := stateObject{
+		store: s,
+	}
+	State = &state
+}
+
+// Close closes the state session
+func (s *stateObject) Close() {
+	s.store.Close()
+}
+
+{{range $property := .Properties}}
+// Get{{$property.Name}} get the {{$property.Name}} value
+func (s *stateObject) Get{{$property.Name}}() {{$property.Type}} {
+	d := s.store.Get("{{$property.Name}}")
+	if d == nil {
+		return {{$property.Default}}
+	}
+	v, err := decode{{$property.Type}}(d)
+	if err != nil {
+		log.Error("Error decoding %s value for %s: %s", "{{$property.Type}}", "{{$property.Name}}", err.Error())
+		return {{$property.Default}}
+	}
+	return *v
+}
+
+// Set{{$property.Name}} set the {{$property.Name}} value
+func (s *stateObject) Set{{$property.Name}}(value {{$property.Type}}) {
+	b, err := encode{{$property.Type}}(value)
+	if err != nil {
+		log.Error("Error encoding %s value for %s: %s", "{{$property.Type}}", "{{$property.Name}}", err.Error())
+		return
+	}
+	s.store.Write("{{$property.Name}}", b)
+}
+{{end}}
+
+{{range $type := .Types}}
+func encode{{$type}}(o {{$type}}) ([]byte, error) {
+	var buf bytes.Buffer
+	err := gob.NewEncoder(&buf).Encode(o)
+	if err != nil {
+		return nil, err
+	}
+	return buf.Bytes(), nil
+}
+func decode{{$type}}(data []byte) (*{{$type}}, error) {
+	w := new({{$type}})
+	reader := bytes.NewReader(data)
+	dec := gob.NewDecoder(reader)
+	if err := dec.Decode(&w); err != nil {
+		return nil, err
+	}
+	return w, nil
+}
+{{end}}
+
+{{end}}

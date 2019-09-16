@@ -1,0 +1,50 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+import (
+	"path"
+
+	"github.com/ecnepsnai/ds"
+)
+
+{{range $store := .Stores}}
+type {{$store.LowercaseName}}StoreObject struct {
+	Table *ds.Table
+}
+
+// {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
+var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{}
+
+func register{{$store.TitlecaseName}}Store() {
+	table, err := ds.Register({{$store.Object}}{}, path.Join(Directories.Data, "{{$store.LowercaseName}}.db"), &ds.Options{
+		{{if $store.Unordered}}
+		DisableSorting: true,
+		{{end}}
+	})
+	if err != nil {
+		log.Fatal("Error registering {{$store.LowercaseName}} store: %s", err.Error())
+	}
+	{{$store.TitlecaseName}}Store.Table = table
+}
+{{end}}
+
+// DataStoreSetup set up the data store
+func DataStoreSetup() {
+	{{range $store := .Stores}}
+	register{{$store.TitlecaseName}}Store()
+	{{end}}
+}
+
+// DataStoreTeardown tear down the data store
+func DataStoreTeardown() {
+	{{range $store := .Stores}}
+	if {{$store.TitlecaseName}}Store.Table != nil {
+		{{$store.TitlecaseName}}Store.Table.Close()
+	}
+	{{end}}
+
+}
+
+{{end}}

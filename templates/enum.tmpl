@@ -1,0 +1,61 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+{{range $enum := .Enums}}
+const (
+	{{range $value := .Values}}
+	// {{$enum.Name}}{{$value.Key}} {{$value.Description}}
+	{{$enum.Name}}{{$value.Key}} = {{$value.Value}}
+	{{end}}
+)
+
+// All{{$enum.Name}} all {{$enum.Name}} values
+var All{{$enum.Name}} = []{{$enum.Type}}{
+	{{range $value := .Values}}
+	{{$enum.Name}}{{$value.Key}},
+	{{end}}
+}
+
+// {{$enum.Name}}Map map {{$enum.Name}} keys to values
+var {{$enum.Name}}Map = map[{{$enum.Type}}]{{$enum.Type}}{
+	{{range $value := .Values}}
+	{{$enum.Name}}{{$value.Key}}: {{$value.Value}},
+	{{end}}
+}
+
+// {{$enum.Name}}NameMap map {{$enum.Name}} keys to values
+var {{$enum.Name}}NameMap = map[string]{{$enum.Type}}{
+	{{range $value := .Values}}
+	"{{$value.Key}}": {{$value.Value}},
+	{{end}}
+}
+
+// Is{{$enum.Name}} is the provided value a valid {{$enum.Name}}
+func Is{{$enum.Name}}(q {{$enum.Type}}) bool {
+	_, k := {{$enum.Name}}Map[q]
+	return k
+}
+
+// {{$enum.Name}}Schema the {{$enum.Name}} schema.
+var {{$enum.Name}}Schema = []map[string]interface{}{
+	{{range $value := .Values}}
+	{
+		"name":        "{{$value.Title}}",
+		"description": "{{$value.Description}}",
+		"value":       {{$value.Value}},
+	},
+	{{end}}
+}
+
+{{end}}
+
+// AllEnums map of all enums
+var AllEnums = map[string]interface{}{
+	{{range $enum := .Enums}}
+	"{{$enum.Name}}": {{$enum.Name}}NameMap,
+	{{end}}
+}
+
+{{end}}

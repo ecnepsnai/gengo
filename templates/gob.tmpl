@@ -1,0 +1,30 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+import (
+    "encoding/gob"
+
+    {{range $include := .Includes}}
+    "{{$include}}"
+    {{end}}
+)
+
+func registerGobType(o interface{}) {
+	defer panicRecovery()
+	gob.Register(o)
+}
+
+func panicRecovery() {
+	recover()
+}
+
+// GobSetup register gob types
+func GobSetup() {
+    {{range $gob := .Gobs}}
+    registerGobType({{$gob.Type}})
+    {{end}}
+}
+
+{{end}}

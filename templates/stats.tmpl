@@ -1,0 +1,127 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+import (
+	"sync"
+
+	"github.com/ecnepsnai/ring"
+)
+
+// Counters all counters
+type Counters struct {
+	{{range $counter := .Stats.VolatileCounters}}
+	{{$counter.Name}} uint64
+	{{end}}
+	{{range $counter := .Stats.NonvolatileCounters}}
+	{{$counter.Name}} uint64
+	{{end}}
+}
+
+// Timers All timers
+type Timers struct {
+	{{range $timer := .Stats.Timers}}
+	{{$timer.Name}} *ring.Ring
+	{{end}}
+}
+
+func (s *Stats) setup() {
+	s.parent = &sync.RWMutex{}
+	s.locks = map[string]*sync.Mutex{
+		{{range $counter := .Stats.VolatileCounters}}
+		"{{$counter.Name}}": &sync.Mutex{},
+		{{end}}
+		{{range $counter := .Stats.NonvolatileCounters}}
+		"{{$counter.Name}}": &sync.Mutex{},
+		{{end}}
+	}
+	s.current = Counters{}
+
+	{{range $timer := .Stats.Timers}}
+	s.timers.{{$timer.Name}} = ring.New(15)
+	{{end}}
+}
+
+func (s *Stats) reset() {
+	s.parent.Lock()
+	defer s.parent.Unlock()
+
+	{{range $counter := .Stats.VolatileCounters}}
+	s.current.{{$counter.Name}} = 0
+	{{end}}
+	{{range $timer := .Stats.Timers}}
+	s.timers.{{$timer.Name}} = ring.New(15)
+	{{end}}
+}
+
+{{range $counter := .Stats.VolatileCounters}}
+// Increment{{$counter.Name}} increment {{$counter.Description}}
+func (s *Stats) Increment{{$counter.Name}}() {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+	lock := s.locks["{{$counter.Name}}"]
+	lock.Lock()
+	defer lock.Unlock()
+	s.current.{{$counter.Name}}++
+}
+{{end}}
+
+{{range $counter := .Stats.NonvolatileCounters}}
+// Increment{{$counter.Name}} increment {{$counter.Description}}
+func (s *Stats) Increment{{$counter.Name}}() {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+	lock := s.locks["{{$counter.Name}}"]
+	lock.Lock()
+	defer lock.Unlock()
+	s.current.{{$counter.Name}}++
+}
+{{end}}
+
+{{range $counter := .Stats.NonvolatileCounters}}
+// Decrement{{$counter.Name}} decrement {{$counter.Description}}
+func (s *Stats) Decrement{{$counter.Name}}() {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+	lock := s.locks["{{$counter.Name}}"]
+	lock.Lock()
+	defer lock.Unlock()
+	s.current.{{$counter.Name}}--
+}
+{{end}}
+
+{{range $timer := .Stats.Timers}}
+// Add{{$timer.Name}} add a sample of {{$timer.Description}}
+func (s *Stats) Add{{$timer.Name}}(value float32) {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+	// Don't need to lock ourselves as ring is threadsafe
+	s.timers.{{$timer.Name}}.Add(value)
+}
+{{end}}
+
+// GetTimerAverages get the average times for all timers
+func (s *Stats) GetTimerAverages() map[string]float32 {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+
+	averages := map[string]float32{}
+
+	{{range $timer := .Stats.Timers}}
+	{{$timer.Name}}s := s.timers.{{$timer.Name}}.All()
+	if {{$timer.Name}}s != nil && len({{$timer.Name}}s) > 0 {
+		var {{$timer.Name}}Sum float32
+		for _, obj := range {{$timer.Name}}s {
+			{{$timer.Name}} := obj.(float32)
+			{{$timer.Name}}Sum += {{$timer.Name}}
+		}
+		{{$timer.Name}}Avg := {{$timer.Name}}Sum / float32(len({{$timer.Name}}s))
+		averages["{{$timer.Name}}"] = {{$timer.Name}}Avg
+	}
+	{{end}}
+
+	return averages
+}
+
+{{end}}

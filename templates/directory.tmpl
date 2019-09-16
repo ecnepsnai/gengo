@@ -1,0 +1,105 @@
+{{block "main" .}}package {{.PackageName}}
+
+// This file is was generated automatically on {{.CodeGen.Date}} by Codegen v{{.CodeGen.Version}}
+// Do not make changes to this file as they will be lost
+
+import (
+	"fmt"
+	"os"
+	"path"
+	"path/filepath"
+)
+
+func getAPIOperatingDir() string {
+	ex, err := os.Executable()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Unable to determine working directory: %s\n" + err.Error())
+		os.Exit(1)
+	}
+	return filepath.Dir(ex)
+}
+
+var operatingDirectory = getAPIOperatingDir()
+var dataDirectory = getAPIOperatingDir()
+
+type apiDirectories struct {
+	Base      string
+	{{range $dir := .Directories}}
+		{{$dir.Name}} string
+		{{range $subdir := $dir.SubDirectories}}
+			{{$subdir.Name}} string
+		{{end}}
+	{{end}}
+}
+
+// Directories absolute paths of API related directires.
+var Directories = apiDirectories{}
+
+func fsSetup() {
+	Directories = apiDirectories{
+		Base:      operatingDirectory,
+		{{range $dir := .Directories}}
+			{{if $dir.IsData}}
+			{{$dir.Name}}:    path.Join(dataDirectory, "{{$dir.DirectoryName}}"),
+			{{else}}
+			{{$dir.Name}}:    path.Join(operatingDirectory, "{{$dir.DirectoryName}}"),
+			{{end}}
+			{{range $subdir := $dir.SubDirectories}}
+				{{if $dir.IsData}}
+				{{$subdir.Name}}:    path.Join(dataDirectory, "{{$dir.DirectoryName}}", "{{$subdir.DirectoryName}}"),
+				{{else}}
+				{{$subdir.Name}}:    path.Join(operatingDirectory, "{{$dir.DirectoryName}}", "{{$subdir.DirectoryName}}"),
+				{{end}}
+			{{end}}
+		{{end}}
+	}
+	{{range $dir := .Directories}}
+		{{if $dir.Required}}
+			if !DirectoryExists(Directories.{{$dir.Name}}) {
+				fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.{{$dir.Name}})
+				os.Exit(1)
+			}
+		{{else}}
+			MakeDirectoryIfNotExist(Directories.{{$dir.Name}})
+		{{end}}
+
+		{{range $subdir := $dir.SubDirectories}}
+			{{if $subdir.Required}}
+				if !DirectoryExists(Directories.{{$subdir.Name}}) {
+					fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.{{$subdir.Name}})
+					os.Exit(1)
+				}
+			{{else}}
+				MakeDirectoryIfNotExist(Directories.{{$subdir.Name}})
+			{{end}}
+		{{end}}
+	{{end}}
+}
+
+// DirectoryExists does the given directory exist (and is it a directory)
+func DirectoryExists(directoryPath string) bool {
+	stat, err := os.Stat(directoryPath)
+	return err == nil && stat.IsDir()
+}
+
+// MakeDirectoryIfNotExist make the given directory if it does not exist
+func MakeDirectoryIfNotExist(directoryPath string) {
+	if !DirectoryExists(directoryPath) {
+		os.MkdirAll(directoryPath, 0755)
+	}
+}
+
+// FileExists does the given file exist
+func FileExists(filePath string) bool {
+	_, err := os.Stat(filePath)
+	if err == nil {
+		return true
+	}
+	if os.IsNotExist(err) {
+		return false
+	}
+	fmt.Fprintf(os.Stderr, "Error stat-ing file '%s': %s", filePath, err.Error())
+	return false
+}
+
+{{end}}
