@@ -11,10 +11,7 @@ import (
 
 // Counters all counters
 type Counters struct {
-	{{range $counter := .Stats.VolatileCounters}}
-	{{$counter.Name}} uint64
-	{{end}}
-	{{range $counter := .Stats.NonvolatileCounters}}
+	{{range $counter := .Stats.Counters}}
 	{{$counter.Name}} uint64
 	{{end}}
 }
@@ -26,13 +23,22 @@ type Timers struct {
 	{{end}}
 }
 
-func (s *Stats) setup() {
+type statsObject struct {
+	parent  *sync.RWMutex
+	locks   map[string]*sync.Mutex
+	current Counters
+	timers  Timers
+}
+
+// Stats the global stats object
+var Stats *statsObject
+
+// StatsSetup setup stats
+func StatsSetup() {
+	s := statsObject{}
 	s.parent = &sync.RWMutex{}
 	s.locks = map[string]*sync.Mutex{
-		{{range $counter := .Stats.VolatileCounters}}
-		"{{$counter.Name}}": &sync.Mutex{},
-		{{end}}
-		{{range $counter := .Stats.NonvolatileCounters}}
+		{{range $counter := .Stats.Counters}}
 		"{{$counter.Name}}": &sync.Mutex{},
 		{{end}}
 	}
@@ -41,13 +47,16 @@ func (s *Stats) setup() {
 	{{range $timer := .Stats.Timers}}
 	s.timers.{{$timer.Name}} = ring.New(15)
 	{{end}}
+
+	Stats = &s
 }
 
-func (s *Stats) reset() {
+// Reset reset all volatile stats
+func (s *statsObject) Reset() {
 	s.parent.Lock()
 	defer s.parent.Unlock()
 
-	{{range $counter := .Stats.VolatileCounters}}
+	{{range $counter := .Stats.Counters}}
 	s.current.{{$counter.Name}} = 0
 	{{end}}
 	{{range $timer := .Stats.Timers}}
@@ -55,9 +64,9 @@ func (s *Stats) reset() {
 	{{end}}
 }
 
-{{range $counter := .Stats.VolatileCounters}}
+{{range $counter := .Stats.Counters}}
 // Increment{{$counter.Name}} increment {{$counter.Description}}
-func (s *Stats) Increment{{$counter.Name}}() {
+func (s *statsObject) Increment{{$counter.Name}}() {
 	s.parent.RLock()
 	defer s.parent.RUnlock()
 	lock := s.locks["{{$counter.Name}}"]
@@ -65,23 +74,9 @@ func (s *Stats) Increment{{$counter.Name}}() {
 	defer lock.Unlock()
 	s.current.{{$counter.Name}}++
 }
-{{end}}
 
-{{range $counter := .Stats.NonvolatileCounters}}
-// Increment{{$counter.Name}} increment {{$counter.Description}}
-func (s *Stats) Increment{{$counter.Name}}() {
-	s.parent.RLock()
-	defer s.parent.RUnlock()
-	lock := s.locks["{{$counter.Name}}"]
-	lock.Lock()
-	defer lock.Unlock()
-	s.current.{{$counter.Name}}++
-}
-{{end}}
-
-{{range $counter := .Stats.NonvolatileCounters}}
 // Decrement{{$counter.Name}} decrement {{$counter.Description}}
-func (s *Stats) Decrement{{$counter.Name}}() {
+func (s *statsObject) Decrement{{$counter.Name}}() {
 	s.parent.RLock()
 	defer s.parent.RUnlock()
 	lock := s.locks["{{$counter.Name}}"]
@@ -89,11 +84,21 @@ func (s *Stats) Decrement{{$counter.Name}}() {
 	defer lock.Unlock()
 	s.current.{{$counter.Name}}--
 }
+
+// Set{{$counter.Name}} set {{$counter.Description}}
+func (s *statsObject) Set{{$counter.Name}}(newVal uint64) {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+	lock := s.locks["{{$counter.Name}}"]
+	lock.Lock()
+	defer lock.Unlock()
+	s.current.{{$counter.Name}} = newVal
+}
 {{end}}
 
 {{range $timer := .Stats.Timers}}
 // Add{{$timer.Name}} add a sample of {{$timer.Description}}
-func (s *Stats) Add{{$timer.Name}}(value float32) {
+func (s *statsObject) Add{{$timer.Name}}(value float32) {
 	s.parent.RLock()
 	defer s.parent.RUnlock()
 	// Don't need to lock ourselves as ring is threadsafe
@@ -102,7 +107,7 @@ func (s *Stats) Add{{$timer.Name}}(value float32) {
 {{end}}
 
 // GetTimerAverages get the average times for all timers
-func (s *Stats) GetTimerAverages() map[string]float32 {
+func (s *statsObject) GetTimerAverages() map[string]float32 {
 	s.parent.RLock()
 	defer s.parent.RUnlock()
 
@@ -123,5 +128,4 @@ func (s *Stats) GetTimerAverages() map[string]float32 {
 
 	return averages
 }
-
 {{end}}

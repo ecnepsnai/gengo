@@ -13,7 +13,7 @@ import (
 // GenerateStore generates the store file
 func GenerateStore(options Options) {
 	storeConfig := path.Join(".", "store.json")
-	storeFile := path.Join(".", "cbgen_cbgen_store.go")
+	storeFile := path.Join(".", "cbgen_store.go")
 
 	if _, err := os.Stat(storeConfig); err != nil {
 		return
@@ -83,6 +83,7 @@ func GenerateStore(options Options) {
 	})
 	if err != nil {
 		log.Fatalf("Error generating store file: %s", err.Error())
+		defer os.Remove(f.Name())
 	}
 	err = os.Rename(storeFile+"~", storeFile)
 	if err != nil {

@@ -56,19 +56,18 @@ func GenerateStats(options Options) {
 
 // Counter describes a Counter object
 type Counter struct {
-	Name        string
-	Description string
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // Timer describes a Timer object
 type Timer struct {
-	Name        string
-	Description string
+	Name        string `json:"name"`
+	Description string `json:"description"`
 }
 
 // Stats describes a Stats object
 type Stats struct {
-	NonvolatileCounters []Counter
-	VolatileCounters    []Counter
-	Timers              []Timer
+	Counters []Counter `json:"counters"`
+	Timers   []Timer   `json:"timers"`
 }

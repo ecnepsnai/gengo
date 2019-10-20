@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"strings"
 	"text/template"
 )
 
@@ -35,14 +36,24 @@ func GenerateState(options Options) {
 	defer f.Close()
 
 	var tmap = map[string]bool{}
-	for _, property := range states {
-		tmap[property.Type] = true
+	i := 0
+	for i < len(states) {
+		property := states[i]
+		tmap[property.UnsafeType] = true
+		states[i].Type = stateType{
+			Name: strings.ReplaceAll(property.UnsafeType, "[]", ""),
+			Type: property.UnsafeType,
+		}
+		i++
 	}
 
-	types := make([]string, len(tmap))
-	i := 0
+	types := make([]stateType, len(tmap))
+	i = 0
 	for k := range tmap {
-		types[i] = k
+		types[i] = stateType{
+			Type: k,
+			Name: strings.ReplaceAll(k, "[]", ""),
+		}
 		i++
 	}
 
@@ -50,7 +61,7 @@ func GenerateState(options Options) {
 		CodeGen     MetaInfo
 		PackageName string
 		Properties  []StateProperty
-		Types       []string
+		Types       []stateType
 	}{
 		CodeGen:     options.MetaInfo,
 		PackageName: options.PackageName,
@@ -70,7 +81,13 @@ func GenerateState(options Options) {
 
 // StateProperty describes a state property
 type StateProperty struct {
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	Default string `json:"default"`
+	Name       string `json:"name"`
+	UnsafeType string `json:"type"`
+	Type       stateType
+	Default    string `json:"default"`
+}
+
+type stateType struct {
+	Type string
+	Name string
 }

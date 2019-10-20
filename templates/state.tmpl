@@ -36,24 +36,24 @@ func (s *stateObject) Close() {
 
 {{range $property := .Properties}}
 // Get{{$property.Name}} get the {{$property.Name}} value
-func (s *stateObject) Get{{$property.Name}}() {{$property.Type}} {
+func (s *stateObject) Get{{$property.Name}}() {{$property.Type.Type}} {
 	d := s.store.Get("{{$property.Name}}")
 	if d == nil {
 		return {{$property.Default}}
 	}
-	v, err := decode{{$property.Type}}(d)
+	v, err := decode{{$property.Type.Name}}(d)
 	if err != nil {
-		log.Error("Error decoding %s value for %s: %s", "{{$property.Type}}", "{{$property.Name}}", err.Error())
+		log.Error("Error decoding %s value for %s: %s", "{{$property.Type.Type}}", "{{$property.Name}}", err.Error())
 		return {{$property.Default}}
 	}
 	return *v
 }
 
 // Set{{$property.Name}} set the {{$property.Name}} value
-func (s *stateObject) Set{{$property.Name}}(value {{$property.Type}}) {
-	b, err := encode{{$property.Type}}(value)
+func (s *stateObject) Set{{$property.Name}}(value {{$property.Type.Type}}) {
+	b, err := encode{{$property.Type.Name}}(value)
 	if err != nil {
-		log.Error("Error encoding %s value for %s: %s", "{{$property.Type}}", "{{$property.Name}}", err.Error())
+		log.Error("Error encoding %s value for %s: %s", "{{$property.Type.Type}}", "{{$property.Name}}", err.Error())
 		return
 	}
 	s.store.Write("{{$property.Name}}", b)
@@ -61,7 +61,7 @@ func (s *stateObject) Set{{$property.Name}}(value {{$property.Type}}) {
 {{end}}
 
 {{range $type := .Types}}
-func encode{{$type}}(o {{$type}}) ([]byte, error) {
+func encode{{$type.Name}}(o {{$type.Type}}) ([]byte, error) {
 	var buf bytes.Buffer
 	err := gob.NewEncoder(&buf).Encode(o)
 	if err != nil {
@@ -69,8 +69,8 @@ func encode{{$type}}(o {{$type}}) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-func decode{{$type}}(data []byte) (*{{$type}}, error) {
-	w := new({{$type}})
+func decode{{$type.Name}}(data []byte) (*{{$type.Type}}, error) {
+	w := new({{$type.Type}})
 	reader := bytes.NewReader(data)
 	dec := gob.NewDecoder(reader)
 	if err := dec.Decode(&w); err != nil {

@@ -4,9 +4,7 @@
 // Do not make changes to this file as they will be lost
 
 import (
-	"bytes"
-	"encoding/gob"
-	"time"
+	"sync"
 
 	{{range $imp := .ExtraImports}}
 	"{{$imp}}"
@@ -15,12 +13,17 @@ import (
 )
 
 {{range $store := .Stores}}
-type {{$store.LowercaseName}}StoreObject struct{ Store *store.Store }
+type {{$store.LowercaseName}}StoreObject struct{
+	Store *store.Store
+	Lock *sync.Mutex
+}
 {{end}}
 
 {{range $store := .Stores}}
 // {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
-var {{$store.TitlecaseName}}Store = new({{$store.LowercaseName}}StoreObject)
+var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{
+	Lock: &sync.Mutex{},
+}
 {{end}}
 
 // StoreSetup sets up all stores
