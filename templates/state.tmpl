@@ -58,6 +58,11 @@ func (s *stateObject) Set{{$property.Name}}(value {{$property.Type.Type}}) {
 	}
 	s.store.Write("{{$property.Name}}", b)
 }
+
+// Default{{$property.Name}} get the default value for {{$property.Name}}
+func (s *stateObject) Default{{$property.Name}}() {{$property.Type.Type}} {
+	return {{$property.Default}}
+}
 {{end}}
 
 {{range $type := .Types}}
