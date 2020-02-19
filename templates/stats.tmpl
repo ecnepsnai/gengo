@@ -98,7 +98,7 @@ func (s *statsObject) Set{{$counter.Name}}(newVal uint64) {
 
 {{range $timer := .Stats.Timers}}
 // Add{{$timer.Name}} add a sample of {{$timer.Description}}
-func (s *statsObject) Add{{$timer.Name}}(value float32) {
+func (s *statsObject) Add{{$timer.Name}}(value float64) {
 	s.parent.RLock()
 	defer s.parent.RUnlock()
 	// Don't need to lock ourselves as ring is threadsafe
@@ -107,21 +107,21 @@ func (s *statsObject) Add{{$timer.Name}}(value float32) {
 {{end}}
 
 // GetTimerAverages get the average times for all timers
-func (s *statsObject) GetTimerAverages() map[string]float32 {
+func (s *statsObject) GetTimerAverages() map[string]float64 {
 	s.parent.RLock()
 	defer s.parent.RUnlock()
 
-	averages := map[string]float32{}
+	averages := map[string]float64{}
 
 	{{range $timer := .Stats.Timers}}
 	{{$timer.Name}}s := s.timers.{{$timer.Name}}.All()
 	if {{$timer.Name}}s != nil && len({{$timer.Name}}s) > 0 {
-		var {{$timer.Name}}Sum float32
+		var {{$timer.Name}}Sum float64
 		for _, obj := range {{$timer.Name}}s {
-			{{$timer.Name}} := obj.(float32)
+			{{$timer.Name}} := obj.(float64)
 			{{$timer.Name}}Sum += {{$timer.Name}}
 		}
-		{{$timer.Name}}Avg := {{$timer.Name}}Sum / float32(len({{$timer.Name}}s))
+		{{$timer.Name}}Avg := {{$timer.Name}}Sum / float64(len({{$timer.Name}}s))
 		averages["{{$timer.Name}}"] = {{$timer.Name}}Avg
 	}
 	{{end}}

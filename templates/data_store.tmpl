@@ -5,6 +5,7 @@
 
 import (
 	"path"
+	"sync"
 
 	"github.com/ecnepsnai/ds"
 )
@@ -12,6 +13,8 @@ import (
 {{range $store := .Stores}}
 type {{$store.LowercaseName}}StoreObject struct {
 	Table *ds.Table
+	Cache []{{$store.Object}}
+	CacheLock *sync.RWMutex
 }
 
 // {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
@@ -27,6 +30,7 @@ func register{{$store.TitlecaseName}}Store() {
 		log.Fatal("Error registering {{$store.LowercaseName}} store: %s", err.Error())
 	}
 	{{$store.TitlecaseName}}Store.Table = table
+	{{$store.TitlecaseName}}Store.CacheLock = &sync.RWMutex{}
 }
 {{end}}
 

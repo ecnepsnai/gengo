@@ -255,8 +255,8 @@ Options go into the `stats.json` file.
 - `func (s *statsObject) Increment<counter name>()`: Increment the counter by 1
 - `func (s *statsObject) Decrement<counter name>()`: Decrement the counter by 1
 - `func (s *statsObject) Set<counter name>(newVal uint64)`: Set the value of the counter
-- `func (s *statsObject) Add<timer name>(value float32)`: Add a sample to the timer
-- `func (s *statsObject) GetTimerAverages() map[string]float32`: Get the averages for all timers
+- `func (s *statsObject) Add<timer name>(value float64)`: Add a sample to the timer
+- `func (s *statsObject) GetTimerAverages() map[string]float64`: Get the averages for all timers
 
 ## Store
 
