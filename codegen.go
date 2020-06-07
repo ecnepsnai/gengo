@@ -7,7 +7,6 @@ import (
 	"os/exec"
 	"path"
 	"sync"
-	"time"
 )
 
 func main() {
@@ -37,7 +36,6 @@ func main() {
 	}
 
 	meta := MetaInfo{
-		Date:    time.Now().Format("2006-01-02"),
 		Version: "1.3.2",
 	}
 
@@ -71,41 +69,28 @@ func Generate(options Options) {
 		gopath = build.Default.GOPATH
 	}
 
-	wg := sync.WaitGroup{}
-	wg.Add(8)
+	type genFunc func(Options)
+	ops := []genFunc{
+		GenerateVersion,
+		GenerateDirectory,
+		GenerateState,
+		GenerateStore,
+		GenerateEnum,
+		GenerateStats,
+		GenerateDataStore,
+		GenerateGob,
+	}
 
-	go func() {
-		GenerateVersion(options)
-		wg.Done()
-	}()
-	go func() {
-		GenerateDirectory(options)
-		wg.Done()
-	}()
-	go func() {
-		GenerateState(options)
-		wg.Done()
-	}()
-	go func() {
-		GenerateStore(options)
-		wg.Done()
-	}()
-	go func() {
-		GenerateEnum(options)
-		wg.Done()
-	}()
-	go func() {
-		GenerateStats(options)
-		wg.Done()
-	}()
-	go func() {
-		GenerateDataStore(options)
-		wg.Done()
-	}()
-	go func() {
-		GenerateGob(options)
-		wg.Done()
-	}()
+	wg := sync.WaitGroup{}
+	wg.Add(len(ops))
+
+	for i := range ops {
+		op := ops[i]
+		go func() {
+			op(options)
+			wg.Done()
+		}()
+	}
 
 	wg.Wait()
 }
@@ -121,7 +106,6 @@ func goFmt(path string) {
 
 // MetaInfo describes meta information about CodeGen
 type MetaInfo struct {
-	Date    string
 	Version string
 }
 
