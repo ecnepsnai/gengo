@@ -36,7 +36,7 @@ func main() {
 	}
 
 	meta := MetaInfo{
-		Version: "1.3.2",
+		Version: "v1.4.0",
 	}
 
 	Generate(Options{
