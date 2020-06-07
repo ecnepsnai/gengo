@@ -39,7 +39,7 @@ func StatsSetup() {
 	s.parent = &sync.RWMutex{}
 	s.locks = map[string]*sync.Mutex{
 		{{range $counter := .Stats.Counters}}
-		"{{$counter.Name}}": &sync.Mutex{},
+		"{{$counter.Name}}": {},
 		{{end}}
 	}
 	s.current = Counters{}
