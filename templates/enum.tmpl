@@ -54,7 +54,7 @@ var {{$enum.Name}}Schema = []map[string]interface{}{
 // AllEnums map of all enums
 var AllEnums = map[string]interface{}{
 	{{range $enum := .Enums}}
-	"{{$enum.Name}}": {{$enum.Name}}NameMap,
+	"{{$enum.Name}}": {{$enum.Name}}Schema,
 	{{end}}
 }
 

@@ -46,6 +46,7 @@ func (s *stateObject) Get{{$property.Name}}() {{$property.Type.Type}} {
 		log.Error("Error decoding %s value for %s: %s", "{{$property.Type.Type}}", "{{$property.Name}}", err.Error())
 		return {{$property.Default}}
 	}
+	log.Debug("state: key='state.{{$property.Name}}' current='%v'", v)
 	return *v
 }
 
@@ -56,12 +57,18 @@ func (s *stateObject) Set{{$property.Name}}(value {{$property.Type.Type}}) {
 		log.Error("Error encoding %s value for %s: %s", "{{$property.Type.Type}}", "{{$property.Name}}", err.Error())
 		return
 	}
+	log.Debug("state: key='state.{{$property.Name}}' new='%v'", value)
 	s.store.Write("{{$property.Name}}", b)
 }
 
 // Default{{$property.Name}} get the default value for {{$property.Name}}
 func (s *stateObject) Default{{$property.Name}}() {{$property.Type.Type}} {
 	return {{$property.Default}}
+}
+
+// Reset{{$property.Name}} resets {{$property.Name}} to the default value
+func (s *stateObject) Reset{{$property.Name}}() {
+	s.Set{{$property.Name}}(s.Default{{$property.Name}}())
 }
 {{end}}
 
