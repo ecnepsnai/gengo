@@ -26,10 +26,10 @@ func GenerateGob(options Options) {
 	if err = json.Unmarshal(data, &gobs); err != nil {
 		log.Fatalf("Error reading gob configuration: %s", err.Error())
 	}
-	var includes = map[string]bool{}
+	var imports = map[string]bool{}
 	for _, gob := range gobs {
-		if gob.Include != "" {
-			includes[gob.Include] = true
+		if gob.Import != "" {
+			imports[gob.Import] = true
 		}
 	}
 
@@ -44,12 +44,12 @@ func GenerateGob(options Options) {
 		CodeGen     MetaInfo
 		PackageName string
 		Gobs        []Gob
-		Includes    []string
+		Imports     []string
 	}{
 		CodeGen:     options.MetaInfo,
 		PackageName: options.PackageName,
 		Gobs:        gobs,
-		Includes:    mapKeys(includes),
+		Imports:     mapKeys(imports),
 	})
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())
@@ -64,6 +64,6 @@ func GenerateGob(options Options) {
 
 // Gob describes an gob type
 type Gob struct {
-	Type    string `json:"type"`
-	Include string `json:"include"`
+	Type   string `json:"type"`
+	Import string `json:"import"`
 }

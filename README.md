@@ -158,7 +158,7 @@ Options go into the `gob.json` file.
 |Property|Type|Description|
 |-|-|-|
 |`type`|String|The golang type to register, including the `{}`|
-|`include`|String|The include path for this type. Includes are deduplicated|
+|`import`|String|The import path for this type. Imports are deduplicated|
 
 **Example:**
 
@@ -166,7 +166,7 @@ Options go into the `gob.json` file.
 [
     {
         "type": "time.Time{}",
-        "include": "time"
+        "import": "time"
     }
 ]
 ```
@@ -188,6 +188,7 @@ Options go into the `state.json` file.
 |`name`|String|The name of this state property|
 |`type`|String|The golang type for this property|
 |`default`|String|The default value of this property as it would be seen in Golang code. I.E. if it's a string include quotation marks|
+|`import`|String|The import path for this type. Imports are deduplicated|
 
 **Example:**
 
