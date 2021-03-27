@@ -115,7 +115,7 @@ func (s *statsObject) GetTimerAverages() map[string]float64 {
 
 	{{range $timer := .Stats.Timers}}
 	{{$timer.Name}}s := s.timers.{{$timer.Name}}.All()
-	if {{$timer.Name}}s != nil && len({{$timer.Name}}s) > 0 {
+	if len({{$timer.Name}}s) > 0 {
 		var {{$timer.Name}}Sum float64
 		for _, obj := range {{$timer.Name}}s {
 			{{$timer.Name}} := obj.(float64)

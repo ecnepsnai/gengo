@@ -64,9 +64,7 @@ func GenerateStore(options Options) {
 		stores[i] = store
 
 		if store.ExtraImports != nil {
-			for _, imp := range store.ExtraImports {
-				extraImports = append(extraImports, imp)
-			}
+			extraImports = append(extraImports, store.ExtraImports...)
 		}
 	}
 
