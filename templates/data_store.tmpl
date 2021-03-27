@@ -17,7 +17,7 @@ type {{$store.LowercaseName}}StoreObject struct {
 // {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
 var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{}
 
-func register{{$store.TitlecaseName}}Store() {
+func cbgenDataStoreRegister{{$store.TitlecaseName}}Store() {
 	table, err := ds.Register({{$store.Object}}{}, path.Join(Directories.Data, "{{$store.LowercaseName}}.db"), &ds.Options{
 		{{if $store.Unordered}}
 		DisableSorting: true,
@@ -33,7 +33,7 @@ func register{{$store.TitlecaseName}}Store() {
 // DataStoreSetup set up the data store
 func DataStoreSetup() {
 	{{range $store := .Stores}}
-	register{{$store.TitlecaseName}}Store()
+	cbgenDataStoreRegister{{$store.TitlecaseName}}Store()
 	{{end}}
 }
 

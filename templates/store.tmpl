@@ -29,11 +29,11 @@ var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{
 // StoreSetup sets up all stores
 func StoreSetup() {
 	{{range $store := .Stores}}
-	{{$store.TitlecaseName}}Store.Store = newStore("{{$store.LowercaseName}}")
+	{{$store.TitlecaseName}}Store.Store = cbgenStoreNewStore("{{$store.LowercaseName}}")
 	{{end}}
-	registerGobTypes()
+	cbgenStoreRegisterGobTypes()
 }
-func registerGobTypes() {
+func cbgenStoreRegisterGobTypes() {
 	{{range $store := .Stores}}
 	{{range $gob := .Interfaces}}
 	gob.Register({{$gob}})
@@ -48,7 +48,7 @@ func StoreTeardown() {
 	{{end}}
 }
 
-func newStore(storeName string) *store.Store {
+func cbgenStoreNewStore(storeName string) *store.Store {
 	s, err := store.New(Directories.Data, storeName)
 	if err != nil {
 		log.Fatal("Error opening %s store: %s", storeName, err.Error())
