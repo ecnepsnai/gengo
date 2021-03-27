@@ -36,14 +36,20 @@ func GenerateState(options Options) {
 	defer f.Close()
 
 	var tmap = map[string]bool{}
+	var impmap = map[string]bool{}
 	i := 0
 	for i < len(states) {
 		property := states[i]
 		tmap[property.UnsafeType] = true
 		states[i].Type = stateType{
-			Name: strings.ReplaceAll(property.UnsafeType, "[]", ""),
+			Name: strings.ReplaceAll(strings.ReplaceAll(property.UnsafeType, "[]", "Arr"), ".", ""),
 			Type: property.UnsafeType,
 		}
+
+		for _, imp := range property.Import {
+			impmap[imp] = true
+		}
+
 		i++
 	}
 
@@ -52,8 +58,15 @@ func GenerateState(options Options) {
 	for k := range tmap {
 		types[i] = stateType{
 			Type: k,
-			Name: strings.ReplaceAll(k, "[]", ""),
+			Name: strings.ReplaceAll(strings.ReplaceAll(k, "[]", "Arr"), ".", ""),
 		}
+		i++
+	}
+
+	imports := make([]string, len(impmap))
+	i = 0
+	for imp := range impmap {
+		imports[i] = imp
 		i++
 	}
 
@@ -62,11 +75,13 @@ func GenerateState(options Options) {
 		PackageName string
 		Properties  []StateProperty
 		Types       []stateType
+		Imports     []string
 	}{
 		CodeGen:     options.MetaInfo,
 		PackageName: options.PackageName,
 		Properties:  states,
 		Types:       types,
+		Imports:     imports,
 	})
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())
@@ -84,7 +99,8 @@ type StateProperty struct {
 	Name       string `json:"name"`
 	UnsafeType string `json:"type"`
 	Type       stateType
-	Default    string `json:"default"`
+	Default    string   `json:"default"`
+	Import     []string `json:"import"`
 }
 
 type stateType struct {

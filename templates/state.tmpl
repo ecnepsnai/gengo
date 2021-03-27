@@ -8,6 +8,10 @@ import (
 	"encoding/gob"
 
 	"github.com/ecnepsnai/store"
+
+	{{range $import := .Imports}}
+    "{{$import}}"
+    {{end}}
 )
 
 type stateObject struct {
