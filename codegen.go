@@ -1,13 +1,19 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"go/build"
 	"os"
 	"os/exec"
 	"path"
+	"strconv"
+	"strings"
 	"sync"
 )
+
+// Version the current version of Codegen
+var Version = "v1.5.0"
 
 func main() {
 	if len(os.Args) <= 1 {
@@ -35,8 +41,10 @@ func main() {
 		i++
 	}
 
+	assertCodegenVersion()
+
 	meta := MetaInfo{
-		Version: "v1.4.0",
+		Version: Version,
 	}
 
 	Generate(Options{
@@ -115,4 +123,40 @@ func mapKeys(m map[string]bool) []string {
 		keys = append(keys, k)
 	}
 	return keys
+}
+
+func assertCodegenVersion() {
+	codegenConfigPath := "codegen.json"
+	if _, err := os.Stat(codegenConfigPath); err != nil {
+		return
+	}
+
+	codegenConfig := struct {
+		MinimumVersion string `json:"minimum_version"`
+	}{}
+	f, err := os.OpenFile(codegenConfigPath, os.O_RDONLY, 0644)
+	if err != nil {
+		return
+	}
+	defer f.Close()
+	if err := json.NewDecoder(f).Decode(&codegenConfig); err != nil {
+		return
+	}
+
+	versionStrToNumber := func(in string) int {
+		v := strings.ReplaceAll(in[1:], ".", "")
+		i, err := strconv.Atoi(v)
+		if err != nil {
+			return -1
+		}
+		return i
+	}
+
+	currentVersionNumber := versionStrToNumber(Version)
+	minimumVersionNumber := versionStrToNumber(codegenConfig.MinimumVersion)
+
+	if minimumVersionNumber > currentVersionNumber {
+		fmt.Fprintf(os.Stderr, "Incorrect Codegen version installed.\nWanted: %s\nInstalled: %s\n", codegenConfig.MinimumVersion, Version)
+		os.Exit(1)
+	}
 }
