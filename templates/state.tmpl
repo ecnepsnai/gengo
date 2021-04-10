@@ -23,7 +23,7 @@ var State *stateObject
 
 // StateSetup load the saved state
 func StateSetup() {
-	s, err := store.New(Directories.Data, "state")
+	s, err := store.New(Directories.Data, "state", nil)
 	if err != nil {
 		log.Fatal("Error opening state store: %s", err.Error())
 	}

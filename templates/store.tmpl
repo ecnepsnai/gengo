@@ -49,7 +49,7 @@ func StoreTeardown() {
 }
 
 func cbgenStoreNewStore(storeName string) *store.Store {
-	s, err := store.New(Directories.Data, storeName)
+	s, err := store.New(Directories.Data, storeName, nil)
 	if err != nil {
 		log.Fatal("Error opening %s store: %s", storeName, err.Error())
 	}

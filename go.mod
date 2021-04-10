@@ -1,3 +1,3 @@
 module github.com/ecnepsnai/cbgen
 
-go 1.14
+go 1.16
