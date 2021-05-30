@@ -1,6 +1,6 @@
 {{block "main" .}}package {{.PackageName}}
 
-// This file is was generated automatically by Codegen v{{.CodeGen.Version}}
+// This file is was generated automatically by Codegen {{.CodeGen.Version}}
 // Do not make changes to this file as they will be lost
 
 import (
@@ -26,8 +26,8 @@ var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{
 }
 {{end}}
 
-// StoreSetup sets up all stores
-func StoreSetup() {
+// storeSetup sets up all stores
+func storeSetup() {
 	{{range $store := .Stores}}
 	{{$store.TitlecaseName}}Store.Store = cbgenStoreNewStore("{{$store.LowercaseName}}")
 	{{end}}
@@ -41,8 +41,8 @@ func cbgenStoreRegisterGobTypes() {
 	{{end}}
 }
 
-// StoreTeardown tears down all stores
-func StoreTeardown() {
+// storeTeardown tears down all stores
+func storeTeardown() {
 	{{range $store := .Stores}}
 	{{$store.TitlecaseName}}Store.Store.Close()
 	{{end}}

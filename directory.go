@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"text/template"
 )
 
@@ -26,6 +27,12 @@ func GenerateDirectory(options Options) {
 	if err = json.Unmarshal(data, &directories); err != nil {
 		log.Fatalf("Error reading directory configuration: %s", err.Error())
 	}
+	sort.Slice(directories, func(l, r int) bool {
+		left := directories[l]
+		right := directories[r]
+
+		return left.Name < right.Name
+	})
 
 	t := template.Must(template.ParseFiles(getTemplateFile("directory.tmpl")))
 	f, err := os.OpenFile(directoryFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)

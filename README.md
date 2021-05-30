@@ -43,10 +43,10 @@ Options go into the `data_store.json` file.
 
 ### Output
 
-- `func DataStoreSetup()`: Method to set up all data stores
-- `func DataStoreTeardown()`: Method to tear down all data stores
+- `func dataStoreSetup()`: Method to set up all data stores
+- `func dataStoreTeardown()`: Method to tear down all data stores
 - `type <name_lowercase>StoreObject struct{ table *ds.Table }`: Type associated with the store
-- `var <name_titlecase>Store: <name_lowercase>StoreObject`: Global variable associated with the store, set up when `DataStoreSetup()` is called
+- `var <name_titlecase>Store: <name_lowercase>StoreObject`: Global variable associated with the store, set up when `dataStoreSetup()` is called
 
 ## Directories
 
@@ -173,7 +173,7 @@ Options go into the `gob.json` file.
 
 ### Output
 
-- `func GobSetup()`: Method to register all of your gob types
+- `func gobSetup()`: Method to register all of your gob types
 
 ## State Store
 
@@ -205,7 +205,7 @@ Options go into the `state.json` file.
 ### Output
 
 - `var State *stateObject`: The global state object
-- `func StateSetup()`: Method to set up the state store
+- `func stateSetup()`: Method to set up the state store
 - `func (s *stateObject) Close()`: Method to close the state store
 - `func (s *stateObject) Get<property name>() <property type>`: Method to get the property value, or defualt
 - `func (s *stateObject) Set<property name>(value <property type>)`: Method to set the property value
@@ -251,12 +251,13 @@ Options go into the `stats.json` file.
 - `type Counters struct { <counter name> uint64 ... }`: All of your counters and their values
 - `type Timers struct { <timer name> *ring.Ring ... }`: All of your timer samples
 - `var Stats *statsObject`: The global stats object
-- `func StatsSetup()`: Method to set up the stats interface
+- `func statsSetup()`: Method to set up the stats interface
 - `func (s *statsObject) Reset()`: Reset all counters to their default values
 - `func (s *statsObject) Increment<counter name>()`: Increment the counter by 1
 - `func (s *statsObject) Decrement<counter name>()`: Decrement the counter by 1
 - `func (s *statsObject) Set<counter name>(newVal uint64)`: Set the value of the counter
-- `func (s *statsObject) Add<timer name>(value float64)`: Add a sample to the timer
+- `func (s *statsObject) Add<timer name>(value time.Duration)`: Add a sample to the timer
+- `func (s *statsObject) Average<timer name>() float64`: Get the average value for this timer
 - `func (s *statsObject) GetTimerAverages() map[string]float64`: Get the averages for all timers
 
 ## Store
@@ -286,8 +287,8 @@ Options go into the `store.json` file.
 ### Output
 
 - `var <store name>Store = <store name>StoreObject{ Lock: &sync.Mutex{} }`: Global reference to your store
-- `func StoreSetup()`: Method to set up your stores
-- `func StoreTeardown()`: Method to tear down your stores
+- `func storeSetup()`: Method to set up your stores
+- `func storeTeardown()`: Method to tear down your stores
 
 ## Version
 

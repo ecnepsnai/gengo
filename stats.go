@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"text/template"
 )
 
@@ -26,6 +27,18 @@ func GenerateStats(options Options) {
 	if err = json.Unmarshal(data, &stats); err != nil {
 		log.Fatalf("Error reading stats configuration: %s", err.Error())
 	}
+	sort.Slice(stats.Counters, func(l, r int) bool {
+		left := stats.Counters[l]
+		right := stats.Counters[r]
+
+		return left.Name < right.Name
+	})
+	sort.Slice(stats.Timers, func(l, r int) bool {
+		left := stats.Timers[l]
+		right := stats.Timers[r]
+
+		return left.Name < right.Name
+	})
 
 	t := template.Must(template.ParseFiles(getTemplateFile("stats.tmpl")))
 	f, err := os.OpenFile(statsFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)

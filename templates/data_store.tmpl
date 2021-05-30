@@ -1,6 +1,6 @@
 {{block "main" .}}package {{.PackageName}}
 
-// This file is was generated automatically by Codegen v{{.CodeGen.Version}}
+// This file is was generated automatically by Codegen {{.CodeGen.Version}}
 // Do not make changes to this file as they will be lost
 
 import (
@@ -30,15 +30,15 @@ func cbgenDataStoreRegister{{$store.TitlecaseName}}Store() {
 }
 {{end}}
 
-// DataStoreSetup set up the data store
-func DataStoreSetup() {
+// dataStoreSetup set up the data store
+func dataStoreSetup() {
 	{{range $store := .Stores}}
 	cbgenDataStoreRegister{{$store.TitlecaseName}}Store()
 	{{end}}
 }
 
-// DataStoreTeardown tear down the data store
-func DataStoreTeardown() {
+// dataStoreTeardown tear down the data store
+func dataStoreTeardown() {
 	{{range $store := .Stores}}
 	if {{$store.TitlecaseName}}Store.Table != nil {
 		{{$store.TitlecaseName}}Store.Table.Close()

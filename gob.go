@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"text/template"
 )
 
@@ -32,6 +33,12 @@ func GenerateGob(options Options) {
 			imports[gob.Import] = true
 		}
 	}
+	sort.Slice(gobs, func(l, r int) bool {
+		left := gobs[l]
+		right := gobs[r]
+
+		return left.Type < right.Type
+	})
 
 	t := template.Must(template.ParseFiles(getTemplateFile("gob.tmpl")))
 	f, err := os.OpenFile(gobFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)

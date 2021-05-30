@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -41,6 +42,12 @@ func GenerateDataStore(options Options) {
 		store.TitlecaseName = strings.Title(store.Name)
 		stores[i] = store
 	}
+	sort.Slice(stores, func(l, r int) bool {
+		left := stores[l]
+		right := stores[r]
+
+		return left.Name < right.Name
+	})
 
 	err = t.ExecuteTemplate(f, "main", struct {
 		CodeGen      MetaInfo

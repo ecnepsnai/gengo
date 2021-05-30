@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -67,6 +68,11 @@ func GenerateStore(options Options) {
 			extraImports = append(extraImports, store.ExtraImports...)
 		}
 	}
+	sort.Slice(stores, func(l, r int) bool {
+		left := stores[l]
+		right := stores[r]
+		return left.Name < right.Name
+	})
 
 	err = t.ExecuteTemplate(f, "main", struct {
 		CodeGen      MetaInfo

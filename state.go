@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"strings"
 	"text/template"
 )
@@ -62,6 +63,11 @@ func GenerateState(options Options) {
 		}
 		i++
 	}
+	sort.Slice(types, func(l, r int) bool {
+		left := types[l]
+		right := types[r]
+		return left.Name < right.Name
+	})
 
 	imports := make([]string, len(impmap))
 	i = 0

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"path"
+	"sort"
 	"text/template"
 )
 
@@ -26,6 +27,12 @@ func GenerateEnum(options Options) {
 	if err = json.Unmarshal(data, &enums); err != nil {
 		log.Fatalf("Error reading enum configuration: %s", err.Error())
 	}
+	sort.Slice(enums, func(l, r int) bool {
+		left := enums[l]
+		right := enums[r]
+
+		return left.Name < right.Name
+	})
 
 	t := template.Must(template.ParseFiles(getTemplateFile("enum.tmpl")))
 	f, err := os.OpenFile(enumFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
