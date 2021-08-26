@@ -4,6 +4,8 @@
 // Do not make changes to this file as they will be lost
 
 import (
+	"encoding/json"
+	"os"
 	"sync"
 	"time"
 
@@ -20,6 +22,11 @@ type cbgenStatsTimer struct {
 	{{range $timer := .Stats.Timers}}
 	{{$timer.Name}} *ring.Ring
 	{{end}}
+}
+
+type cbgenStatsSavedDataType struct {
+	Counters map[string]uint64
+	Timers   map[string][]float64
 }
 
 type cbgenStatsObject struct {
@@ -61,6 +68,63 @@ func (s *cbgenStatsObject) Reset() {
 	{{range $timer := .Stats.Timers}}
 	s.timers.{{$timer.Name}} = ring.New(15)
 	{{end}}
+}
+
+// Save will write all stat values to the given file name
+func (s *cbgenStatsObject) Save(fileName string) error {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+
+	data := cbgenStatsSavedDataType{
+		Counters: s.CurrentCounters(),
+		Timers: map[string][]float64{
+			{{range $timer := .Stats.Timers}}
+			"{{$timer.Name}}": s.All{{$timer.Name}}Samples(),
+			{{end}}
+		},
+	}
+
+	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	if err := json.NewEncoder(f).Encode(&data); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Load will set all stats values to the data in file name
+func (s *cbgenStatsObject) Load(fileName string) error {
+	s.parent.Lock()
+	defer s.parent.Unlock()
+
+	f, err := os.OpenFile(fileName, os.O_RDONLY, os.ModePerm)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	data := cbgenStatsSavedDataType{}
+	if err := json.NewDecoder(f).Decode(&data); err != nil {
+		return err
+	}
+
+	{{range $counter := .Stats.Counters}}
+	s.current.{{$counter.Name}} = data.Counters["{{$counter.Name}}"]
+	{{end}}
+
+	{{range $timer := .Stats.Timers}}
+	s.timers.{{$timer.Name}} = ring.New(15)
+	for _, sample := range data.Timers["{{$timer.Name}}"] {
+		s.timers.{{$timer.Name}}.Add(sample)
+	}
+	{{end}}
+
+	return nil
 }
 
 {{range $counter := .Stats.Counters}}
@@ -139,6 +203,24 @@ func (s *cbgenStatsObject) Average{{$timer.Name}}() float64 {
 	}
 
 	return average
+}
+
+// All{{$timer.Name}}Samples get all samples for the {{$timer.Name}} timer
+func (s *cbgenStatsObject) All{{$timer.Name}}Samples() []float64 {
+	s.parent.RLock()
+	defer s.parent.RUnlock()
+
+	all := s.timers.{{$timer.Name}}.All()
+	if len(all) == 0 {
+		return []float64{}
+	}
+
+	samples := make([]float64, len(all))
+	for i, s := range all {
+		samples[i] = float64(s.(time.Duration).Milliseconds())
+	}
+
+	return samples
 }
 {{end}}
 

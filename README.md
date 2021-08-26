@@ -250,15 +250,18 @@ Options go into the `stats.json` file.
 
 - `type Counters struct { <counter name> uint64 ... }`: All of your counters and their values
 - `type Timers struct { <timer name> *ring.Ring ... }`: All of your timer samples
-- `var Stats *statsObject`: The global stats object
+- `var Stats *cbgenStatsObject`: The global stats object
 - `func statsSetup()`: Method to set up the stats interface
-- `func (s *statsObject) Reset()`: Reset all counters to their default values
-- `func (s *statsObject) Increment<counter name>()`: Increment the counter by 1
-- `func (s *statsObject) Decrement<counter name>()`: Decrement the counter by 1
-- `func (s *statsObject) Set<counter name>(newVal uint64)`: Set the value of the counter
-- `func (s *statsObject) Add<timer name>(value time.Duration)`: Add a sample to the timer
-- `func (s *statsObject) Average<timer name>() float64`: Get the average value for this timer
-- `func (s *statsObject) GetTimerAverages() map[string]float64`: Get the averages for all timers
+- `func (s *cbgenStatsObject) Reset()`: Reset all counters to their default values
+- `func (s *cbgenStatsObject) Save(fileName string) error`: Write all stat values to the given file name
+- `func (s *cbgenStatsObject) Load(fileName string) error`: Set all stats values to the data in file name
+- `func (s *cbgenStatsObject) Increment<counter name>()`: Increment the counter by 1
+- `func (s *cbgenStatsObject) Decrement<counter name>()`: Decrement the counter by 1
+- `func (s *cbgenStatsObject) Set<counter name>(newVal uint64)`: Set the value of the counter
+- `func (s *cbgenStatsObject) Add<timer name>(value time.Duration)`: Add a sample to the timer
+- `func (s *cbgenStatsObject) Average<timer name>() float64`: Get the average value for this timer
+- `func (s *cbgenStatsObject) All<timer name>Samples() []float64`: Get all samples for the timer
+- `func (s *cbgenStatsObject) GetTimerAverages() map[string]float64`: Get the averages for all timers
 
 ## Store
 
