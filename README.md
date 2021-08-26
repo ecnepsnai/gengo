@@ -204,11 +204,11 @@ Options go into the `state.json` file.
 
 ### Output
 
-- `var State *stateObject`: The global state object
+- `var State *cbgenStateObject`: The global state object
 - `func stateSetup()`: Method to set up the state store
-- `func (s *stateObject) Close()`: Method to close the state store
-- `func (s *stateObject) Get<property name>() <property type>`: Method to get the property value, or defualt
-- `func (s *stateObject) Set<property name>(value <property type>)`: Method to set the property value
+- `func (s *cbgenStateObject) Close()`: Method to close the state store
+- `func (s *cbgenStateObject) Get<property name>() <property type>`: Method to get the property value, or the default value. Threadsafe.
+- `func (s *cbgenStateObject) Set<property name>(value <property type>)`: Method to set the property value. Threadsafe.
 
 ## Stats
 
