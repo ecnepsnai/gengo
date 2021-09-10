@@ -120,7 +120,7 @@ func (s *cbgenStatsObject) Load(fileName string) error {
 	{{range $timer := .Stats.Timers}}
 	s.timers.{{$timer.Name}} = ring.New(15)
 	for _, sample := range data.Timers["{{$timer.Name}}"] {
-		s.timers.{{$timer.Name}}.Add(sample)
+		s.timers.{{$timer.Name}}.Add(time.Duration(sample) * time.Millisecond)
 	}
 	{{end}}
 
@@ -217,7 +217,16 @@ func (s *cbgenStatsObject) All{{$timer.Name}}Samples() []float64 {
 
 	samples := make([]float64, len(all))
 	for i, s := range all {
-		samples[i] = float64(s.(time.Duration).Milliseconds())
+		var sample float64
+
+		if f64, ok := s.(float64); ok {
+			sample = f64
+		}
+		if td, ok := s.(time.Duration); ok {
+			sample = float64(td.Milliseconds())
+		}
+
+		samples[i] = sample
 	}
 
 	return samples
