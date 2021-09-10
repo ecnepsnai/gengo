@@ -45,6 +45,15 @@ func (s *cbgenStateObject) Close() {
 	s.store.Close()
 }
 
+// GetAll will return a map of all current state values
+func (s *cbgenStateObject) GetAll() map[string]interface{} {
+	return map[string]interface{}{
+		{{range $property := .Properties}}
+		"{{$property.Name}}": s.Get{{$property.Name}}(),
+		{{end}}
+	}
+}
+
 {{range $property := .Properties}}
 // Get{{$property.Name}} get the {{$property.Name}} value
 func (s *cbgenStateObject) Get{{$property.Name}}() {{$property.Type.Type}} {
