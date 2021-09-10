@@ -13,7 +13,7 @@ import (
 )
 
 // Version the current version of Codegen
-var Version = "v1.7.0"
+var Version = "v1.8.0"
 
 func main() {
 	if len(os.Args) <= 1 {
