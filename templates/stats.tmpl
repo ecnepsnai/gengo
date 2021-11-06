@@ -84,13 +84,18 @@ func (s *cbgenStatsObject) Save(fileName string) error {
 		},
 	}
 
-	f, err := os.OpenFile(fileName, os.O_CREATE|os.O_WRONLY, os.ModePerm)
+	f, err := os.OpenFile(fileName+".", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		return err
 	}
-	defer f.Close()
 
 	if err := json.NewEncoder(f).Encode(&data); err != nil {
+		f.Close()
+		return err
+	}
+	f.Close()
+
+	if err := os.Rename(fileName+".", fileName); err != nil {
 		return err
 	}
 
