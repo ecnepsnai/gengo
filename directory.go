@@ -8,6 +8,8 @@ import (
 	"path"
 	"sort"
 	"text/template"
+
+	"github.com/ecnepsnai/cbgen/templates"
 )
 
 // GenerateDirectory generates directory file
@@ -34,7 +36,7 @@ func GenerateDirectory(options Options) {
 		return left.Name < right.Name
 	})
 
-	t := template.Must(template.ParseFiles(getTemplateFile("directory.tmpl")))
+	t, _ := template.New("directory").Parse(templates.Directory)
 	f, err := os.OpenFile(directoryFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating directory file: %s", err.Error())

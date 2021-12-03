@@ -8,6 +8,8 @@ import (
 	"path"
 	"sort"
 	"text/template"
+
+	"github.com/ecnepsnai/cbgen/templates"
 )
 
 // GenerateGob generate gob
@@ -40,7 +42,7 @@ func GenerateGob(options Options) {
 		return left.Type < right.Type
 	})
 
-	t := template.Must(template.ParseFiles(getTemplateFile("gob.tmpl")))
+	t, _ := template.New("gob").Parse(templates.Gob)
 	f, err := os.OpenFile(gobFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())

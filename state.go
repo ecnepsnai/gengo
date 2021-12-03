@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/ecnepsnai/cbgen/templates"
 )
 
 // GenerateState generates the state store
@@ -29,7 +31,7 @@ func GenerateState(options Options) {
 		log.Fatalf("Error reading state configuration: %s", err.Error())
 	}
 
-	t := template.Must(template.ParseFiles(getTemplateFile("state.tmpl")))
+	t, _ := template.New("state").Parse(templates.State)
 	f, err := os.OpenFile(stateFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())

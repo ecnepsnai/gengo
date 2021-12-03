@@ -8,6 +8,8 @@ import (
 	"path"
 	"sort"
 	"text/template"
+
+	"github.com/ecnepsnai/cbgen/templates"
 )
 
 // GenerateEnum generate enums and schemas
@@ -34,7 +36,7 @@ func GenerateEnum(options Options) {
 		return left.Name < right.Name
 	})
 
-	t := template.Must(template.ParseFiles(getTemplateFile("enum.tmpl")))
+	t, _ := template.New("enum").Parse(templates.Enum)
 	f, err := os.OpenFile(enumFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating enum file: %s", err.Error())

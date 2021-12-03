@@ -5,6 +5,8 @@ import (
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/ecnepsnai/cbgen/templates"
 )
 
 // GenerateVersion generate a version file
@@ -15,7 +17,7 @@ func GenerateVersion(options Options) {
 
 	versionFile := "cbgen_version.go"
 
-	t := template.Must(template.ParseFiles(getTemplateFile("version.tmpl")))
+	t, _ := template.New("version").Parse(templates.Version)
 	f, err := os.OpenFile(versionFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating version file: %s", err.Error())

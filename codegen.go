@@ -6,14 +6,13 @@ import (
 	"go/build"
 	"os"
 	"os/exec"
-	"path"
 	"strconv"
 	"strings"
 	"sync"
 )
 
 // Version the current version of Codegen
-var Version = "v1.8.1"
+var Version = "v1.8.2"
 
 func main() {
 	if len(os.Args) <= 1 {
@@ -101,11 +100,6 @@ func Generate(options Options) {
 	}
 
 	wg.Wait()
-}
-
-func getTemplateFile(templateName string) string {
-	gopath := os.Getenv("GOPATH")
-	return path.Join(gopath, "src", "github.com", "ecnepsnai", "cbgen", "templates", templateName)
 }
 
 func goFmt(path string) {

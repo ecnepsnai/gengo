@@ -9,6 +9,8 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+
+	"github.com/ecnepsnai/cbgen/templates"
 )
 
 // GenerateDataStore generates the data store file
@@ -29,7 +31,7 @@ func GenerateDataStore(options Options) {
 		log.Fatalf("Error reading data store configuration: %s", err.Error())
 	}
 
-	t := template.Must(template.ParseFiles(getTemplateFile("data_store.tmpl")))
+	t, _ := template.New("data_store").Parse(templates.DataStore)
 	f, err := os.OpenFile(storeFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())

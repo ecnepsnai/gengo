@@ -8,6 +8,8 @@ import (
 	"path"
 	"sort"
 	"text/template"
+
+	"github.com/ecnepsnai/cbgen/templates"
 )
 
 // GenerateStats generates the stats file
@@ -40,7 +42,7 @@ func GenerateStats(options Options) {
 		return left.Name < right.Name
 	})
 
-	t := template.Must(template.ParseFiles(getTemplateFile("stats.tmpl")))
+	t, _ := template.New("stats").Parse(templates.Stats)
 	f, err := os.OpenFile(statsFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating stats file: %s", err.Error())
