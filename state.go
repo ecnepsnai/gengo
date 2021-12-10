@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"sort"
 	"strings"
 	"text/template"
@@ -13,26 +10,17 @@ import (
 	"github.com/ecnepsnai/cbgen/templates"
 )
 
+const stateFileName = "cbgen_state.go"
+
 // GenerateState generates the state store
 func GenerateState(options Options) {
-	stateConfig := path.Join(".", "state.json")
-	stateFile := path.Join(".", "cbgen_state.go")
-
-	if _, err := os.Stat(stateConfig); err != nil {
+	var states []StateProperty
+	if !loadConfig("state", &states) {
 		return
 	}
 
-	var states []StateProperty
-	data, err := ioutil.ReadFile(stateConfig)
-	if err != nil {
-		log.Fatalf("Error reading state configuration: %s", err.Error())
-	}
-	if err = json.Unmarshal(data, &states); err != nil {
-		log.Fatalf("Error reading state configuration: %s", err.Error())
-	}
-
 	t, _ := template.New("state").Parse(templates.State)
-	f, err := os.OpenFile(stateFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(stateFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())
 	}
@@ -94,21 +82,21 @@ func GenerateState(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())
 	}
-	err = os.Rename(stateFile+"~", stateFile)
+	err = os.Rename(stateFileName+"~", stateFileName)
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())
 	}
 
-	goFmt(stateFile)
+	goFmt(stateFileName)
 }
 
 // StateProperty describes a state property
 type StateProperty struct {
-	Name       string `json:"name"`
-	UnsafeType string `json:"type"`
-	Type       stateType
-	Default    string   `json:"default"`
-	Import     []string `json:"import"`
+	Name       string    `json:"name" yaml:"name"`
+	UnsafeType string    `json:"type" yaml:"type"`
+	Type       stateType `json:"-" yaml:"-"`
+	Default    string    `json:"default" yaml:"default"`
+	Import     []string  `json:"import" yaml:"import"`
 }
 
 type stateType struct {

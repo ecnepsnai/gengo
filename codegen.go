@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"go/build"
 	"os"
 	"os/exec"
 	"strconv"
@@ -12,7 +11,7 @@ import (
 )
 
 // Version the current version of Codegen
-var Version = "v1.8.2"
+var Version = "v1.8.3"
 
 func main() {
 	if len(os.Args) <= 1 {
@@ -67,15 +66,8 @@ type Options struct {
 	MetaInfo       MetaInfo
 }
 
-var gopath string
-
 // Generate run the generator with the given options. Outputs files in the current working directory
 func Generate(options Options) {
-	gopath = os.Getenv("GOPATH")
-	if gopath == "" {
-		gopath = build.Default.GOPATH
-	}
-
 	type genFunc func(Options)
 	ops := []genFunc{
 		GenerateVersion,
@@ -126,7 +118,7 @@ func assertCodegenVersion() {
 	}
 
 	codegenConfig := struct {
-		MinimumVersion string `json:"minimum_version"`
+		MinimumVersion string `json:"minimum_version" yaml:"minimum_version"`
 	}{}
 	f, err := os.OpenFile(codegenConfigPath, os.O_RDONLY, 0644)
 	if err != nil {

@@ -1,34 +1,23 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"sort"
 	"text/template"
 
 	"github.com/ecnepsnai/cbgen/templates"
 )
 
+const gobFileName = "cbgen_gob.go"
+
 // GenerateGob generate gob
 func GenerateGob(options Options) {
-	gobConfig := path.Join(".", "gob.json")
-	gobFile := path.Join(".", "cbgen_gob.go")
-
-	if _, err := os.Stat(gobConfig); err != nil {
+	var gobs []Gob
+	if !loadConfig("gob", &gobs) {
 		return
 	}
 
-	var gobs []Gob
-	data, err := ioutil.ReadFile(gobConfig)
-	if err != nil {
-		log.Fatalf("Error reading gob configuration: %s", err.Error())
-	}
-	if err = json.Unmarshal(data, &gobs); err != nil {
-		log.Fatalf("Error reading gob configuration: %s", err.Error())
-	}
 	var imports = map[string]bool{}
 	for _, gob := range gobs {
 		if gob.Import != "" {
@@ -43,7 +32,7 @@ func GenerateGob(options Options) {
 	})
 
 	t, _ := template.New("gob").Parse(templates.Gob)
-	f, err := os.OpenFile(gobFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(gobFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())
 	}
@@ -63,16 +52,16 @@ func GenerateGob(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())
 	}
-	err = os.Rename(gobFile+"~", gobFile)
+	err = os.Rename(gobFileName+"~", gobFileName)
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())
 	}
 
-	goFmt(gobFile)
+	goFmt(gobFileName)
 }
 
 // Gob describes an gob type
 type Gob struct {
-	Type   string `json:"type"`
-	Import string `json:"import"`
+	Type   string `json:"type" yaml:"type"`
+	Import string `json:"import" yaml:"import"`
 }

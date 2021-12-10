@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"sort"
 	"strings"
 	"text/template"
@@ -13,26 +10,17 @@ import (
 	"github.com/ecnepsnai/cbgen/templates"
 )
 
+const storeFileName = "cbgen_store.go"
+
 // GenerateStore generates the store file
 func GenerateStore(options Options) {
-	storeConfig := path.Join(".", "store.json")
-	storeFile := path.Join(".", "cbgen_store.go")
-
-	if _, err := os.Stat(storeConfig); err != nil {
+	var stores []Store
+	if !loadConfig("store", &stores) {
 		return
 	}
 
-	var stores []Store
-	data, err := ioutil.ReadFile(storeConfig)
-	if err != nil {
-		log.Fatalf("Error reading store configuration: %s", err.Error())
-	}
-	if err = json.Unmarshal(data, &stores); err != nil {
-		log.Fatalf("Error reading store configuration: %s", err.Error())
-	}
-
 	t, _ := template.New("store").Parse(templates.Store)
-	f, err := os.OpenFile(storeFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(storeFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating store file: %s", err.Error())
 	}
@@ -91,22 +79,22 @@ func GenerateStore(options Options) {
 		log.Fatalf("Error generating store file: %s", err.Error())
 		defer os.Remove(f.Name())
 	}
-	err = os.Rename(storeFile+"~", storeFile)
+	err = os.Rename(storeFileName+"~", storeFileName)
 	if err != nil {
 		log.Fatalf("Error generating store file: %s", err.Error())
 	}
 
-	goFmt(storeFile)
+	goFmt(storeFileName)
 }
 
 // Store describes a store type
 type Store struct {
-	Name          string `json:"name"`
+	Name          string `json:"name" yaml:"name"`
 	LowercaseName string
 	TitlecaseName string
-	Interfaces    []string   `json:"gobs"`
-	Gobs          []StoreGob `json:"-"`
-	ExtraImports  []string   `json:"extra_imports"`
+	Interfaces    []string   `json:"gobs" yaml:"gobs"`
+	Gobs          []StoreGob `json:"-" yaml:"-"`
+	ExtraImports  []string   `json:"extra_imports" yaml:"extra_imports"`
 }
 
 // StoreGob describes a object to encode/decode using gob

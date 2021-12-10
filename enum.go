@@ -1,34 +1,23 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"sort"
 	"text/template"
 
 	"github.com/ecnepsnai/cbgen/templates"
 )
 
+const enumFileName = "cbgen_enum.go"
+
 // GenerateEnum generate enums and schemas
 func GenerateEnum(options Options) {
-	enumConfig := path.Join(".", "enum.json")
-	enumFile := path.Join(".", "cbgen_enum.go")
-
-	if _, err := os.Stat(enumConfig); err != nil {
+	var enums []Enum
+	if !loadConfig("enum", &enums) {
 		return
 	}
 
-	var enums []Enum
-	data, err := ioutil.ReadFile(enumConfig)
-	if err != nil {
-		log.Fatalf("Error reading enum configuration: %s", err.Error())
-	}
-	if err = json.Unmarshal(data, &enums); err != nil {
-		log.Fatalf("Error reading enum configuration: %s", err.Error())
-	}
 	sort.Slice(enums, func(l, r int) bool {
 		left := enums[l]
 		right := enums[r]
@@ -37,7 +26,7 @@ func GenerateEnum(options Options) {
 	})
 
 	t, _ := template.New("enum").Parse(templates.Enum)
-	f, err := os.OpenFile(enumFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(enumFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating enum file: %s", err.Error())
 	}
@@ -55,27 +44,27 @@ func GenerateEnum(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating enum file: %s", err.Error())
 	}
-	err = os.Rename(enumFile+"~", enumFile)
+	err = os.Rename(enumFileName+"~", enumFileName)
 	if err != nil {
 		log.Fatalf("Error generating enum file: %s", err.Error())
 	}
 
-	goFmt(enumFile)
+	goFmt(enumFileName)
 }
 
 // Enum describes an enum type
 type Enum struct {
-	Name   string      `json:"name"`
-	Type   string      `json:"type"`
-	Values []EnumValue `json:"values"`
+	Name   string      `json:"name" yaml:"name"`
+	Type   string      `json:"type" yaml:"type"`
+	Values []EnumValue `json:"values" yaml:"values"`
 }
 
 // EnumValue describes an single enum value
 type EnumValue struct {
-	Key         string `json:"key"`
-	Description string `json:"description"`
-	Value       string `json:"value"`
-	Name        string `json:"name"`
+	Key         string `json:"key" yaml:"key"`
+	Description string `json:"description" yaml:"description"`
+	Value       string `json:"value" yaml:"value"`
+	Name        string `json:"name" yaml:"name"`
 }
 
 // Title return the title of the enum value

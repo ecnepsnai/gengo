@@ -1,11 +1,8 @@
 package main
 
 import (
-	"encoding/json"
-	"io/ioutil"
 	"log"
 	"os"
-	"path"
 	"sort"
 	"strings"
 	"text/template"
@@ -13,26 +10,17 @@ import (
 	"github.com/ecnepsnai/cbgen/templates"
 )
 
+const dataStoreFileName = "cbgen_data_store.go"
+
 // GenerateDataStore generates the data store file
 func GenerateDataStore(options Options) {
-	storeConfig := path.Join(".", "data_store.json")
-	storeFile := path.Join(".", "cbgen_data_store.go")
-
-	if _, err := os.Stat(storeConfig); err != nil {
+	var stores []DataStore
+	if !loadConfig("data_store", &stores) {
 		return
 	}
 
-	var stores []DataStore
-	data, err := ioutil.ReadFile(storeConfig)
-	if err != nil {
-		log.Fatalf("Error reading data store configuration: %s", err.Error())
-	}
-	if err = json.Unmarshal(data, &stores); err != nil {
-		log.Fatalf("Error reading data store configuration: %s", err.Error())
-	}
-
 	t, _ := template.New("data_store").Parse(templates.DataStore)
-	f, err := os.OpenFile(storeFile+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(dataStoreFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())
 	}
@@ -65,19 +53,19 @@ func GenerateDataStore(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())
 	}
-	err = os.Rename(storeFile+"~", storeFile)
+	err = os.Rename(dataStoreFileName+"~", dataStoreFileName)
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())
 	}
 
-	goFmt(storeFile)
+	goFmt(dataStoreFileName)
 }
 
 // DataStore describes a data store type
 type DataStore struct {
-	Name          string `json:"name"`
+	Name          string `json:"name" yaml:"name"`
 	LowercaseName string
 	TitlecaseName string
-	Object        string `json:"object"`
-	Unordered     bool   `json:"unordered"`
+	Object        string `json:"object" yaml:"object"`
+	Unordered     bool   `json:"unordered" yaml:"unordered"`
 }
