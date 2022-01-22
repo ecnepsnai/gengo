@@ -10,8 +10,7 @@ import (
 
 	"github.com/ecnepsnai/store"
 
-	{{range $import := .Imports}}
-    "{{$import}}"
+	{{range $import := .Imports}}"{{$import}}"
     {{end}}
 )
 
@@ -31,10 +30,8 @@ func stateSetup() {
 	}
 	state := cbgenStateObject{
 		store: s,
-		locks: map[string]*sync.RWMutex{
-			{{range $property := .Properties}}
-				"{{$property.Name}}": {},
-			{{end}}
+		locks: map[string]*sync.RWMutex{ {{range $property := .Properties}}
+				"{{$property.Name}}": {}, {{end}}
 		},
 	}
 	State = &state
@@ -47,10 +44,8 @@ func (s *cbgenStateObject) Close() {
 
 // GetAll will return a map of all current state values
 func (s *cbgenStateObject) GetAll() map[string]interface{} {
-	return map[string]interface{}{
-		{{range $property := .Properties}}
-		"{{$property.Name}}": s.Get{{$property.Name}}(),
-		{{end}}
+	return map[string]interface{}{ {{range $property := .Properties}}
+		"{{$property.Name}}": s.Get{{$property.Name}}(), {{end}}
 	}
 }
 

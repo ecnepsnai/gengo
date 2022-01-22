@@ -21,31 +21,21 @@ type {{$store.LowercaseName}}StoreObject struct{
 
 {{range $store := .Stores}}
 // {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
-var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{
-	Lock: &sync.Mutex{},
-}
+var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{Lock: &sync.Mutex{}}
 {{end}}
 
 // storeSetup sets up all stores
-func storeSetup() {
-	{{range $store := .Stores}}
-	{{$store.TitlecaseName}}Store.Store = cbgenStoreNewStore("{{$store.LowercaseName}}")
-	{{end}}
+func storeSetup() { {{range $store := .Stores}}
+	{{$store.TitlecaseName}}Store.Store = cbgenStoreNewStore("{{$store.LowercaseName}}") {{end}}
 	cbgenStoreRegisterGobTypes()
 }
-func cbgenStoreRegisterGobTypes() {
-	{{range $store := .Stores}}
-	{{range $gob := .Interfaces}}
-	gob.Register({{$gob}})
-	{{end}}
-	{{end}}
+func cbgenStoreRegisterGobTypes() { {{range $store := .Stores}} {{range $gob := .Interfaces}}
+	gob.Register({{$gob}}) {{end}} {{end}}
 }
 
 // storeTeardown tears down all stores
-func storeTeardown() {
-	{{range $store := .Stores}}
-	{{$store.TitlecaseName}}Store.Store.Close()
-	{{end}}
+func storeTeardown() { {{range $store := .Stores}}
+	{{$store.TitlecaseName}}Store.Store.Close() {{end}}
 }
 
 func cbgenStoreNewStore(storeName string) *store.Store {

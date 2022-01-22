@@ -12,16 +12,12 @@ import (
 	"github.com/ecnepsnai/ring"
 )
 
-type cbgenStatsCounter struct {
-	{{range $counter := .Stats.Counters}}
-	{{$counter.Name}} uint64
-	{{end}}
+type cbgenStatsCounter struct { {{range $counter := .Stats.Counters}}
+	{{$counter.Name}} uint64 {{end}}
 }
 
-type cbgenStatsTimer struct {
-	{{range $timer := .Stats.Timers}}
-	{{$timer.Name}} *ring.Ring
-	{{end}}
+type cbgenStatsTimer struct { {{range $timer := .Stats.Timers}}
+	{{$timer.Name}} *ring.Ring {{end}}
 }
 
 type cbgenStatsSavedDataType struct {
@@ -43,16 +39,13 @@ var Stats *cbgenStatsObject
 func statsSetup() {
 	s := cbgenStatsObject{}
 	s.parent = &sync.RWMutex{}
-	s.locks = map[string]*sync.Mutex{
-		{{range $counter := .Stats.Counters}}
-		"{{$counter.Name}}": {},
-		{{end}}
+	s.locks = map[string]*sync.Mutex{ {{range $counter := .Stats.Counters}}
+		"{{$counter.Name}}": {}, {{end}}
 	}
 	s.current = cbgenStatsCounter{}
-
+	
 	{{range $timer := .Stats.Timers}}
-	s.timers.{{$timer.Name}} = ring.New(15)
-	{{end}}
+	s.timers.{{$timer.Name}} = ring.New(15) {{end}}
 
 	Stats = &s
 }
@@ -62,11 +55,9 @@ func (s *cbgenStatsObject) Reset() {
 	s.parent.Lock()
 	defer s.parent.Unlock()
 
-	{{range $counter := .Stats.Counters}}
-	s.current.{{$counter.Name}} = 0
+	{{range $counter := .Stats.Counters}} s.current.{{$counter.Name}} = 0
 	{{end}}
-	{{range $timer := .Stats.Timers}}
-	s.timers.{{$timer.Name}} = ring.New(15)
+	{{range $timer := .Stats.Timers}} s.timers.{{$timer.Name}} = ring.New(15)
 	{{end}}
 }
 
@@ -77,10 +68,8 @@ func (s *cbgenStatsObject) Save(fileName string) error {
 
 	data := cbgenStatsSavedDataType{
 		Counters: s.CurrentCounters(),
-		Timers: map[string][]float64{
-			{{range $timer := .Stats.Timers}}
-			"{{$timer.Name}}": s.All{{$timer.Name}}Samples(),
-			{{end}}
+		Timers: map[string][]float64{ {{range $timer := .Stats.Timers}}
+			"{{$timer.Name}}": s.All{{$timer.Name}}Samples(), {{end}}
 		},
 	}
 
@@ -119,11 +108,9 @@ func (s *cbgenStatsObject) Load(fileName string) error {
 	}
 
 	{{range $counter := .Stats.Counters}}
-	s.current.{{$counter.Name}} = data.Counters["{{$counter.Name}}"]
-	{{end}}
+	s.current.{{$counter.Name}} = data.Counters["{{$counter.Name}}"] {{end}}
 
-	{{range $timer := .Stats.Timers}}
-	s.timers.{{$timer.Name}} = ring.New(15)
+	{{range $timer := .Stats.Timers}} s.timers.{{$timer.Name}} = ring.New(15)
 	for _, sample := range data.Timers["{{$timer.Name}}"] {
 		s.timers.{{$timer.Name}}.Add(time.Duration(sample) * time.Millisecond)
 	}
@@ -173,8 +160,7 @@ func (s *cbgenStatsObject) CurrentCounters() map[string]uint64 {
 		l.Lock()
 	}
 	{{range $counter := .Stats.Counters}}
-	m["{{$counter.Name}}"] = s.current.{{$counter.Name}}
-	{{end}}
+	m["{{$counter.Name}}"] = s.current.{{$counter.Name}}{{end}}
 	for _, l := range s.locks {
 		l.Unlock()
 	}
@@ -244,7 +230,6 @@ func (s *cbgenStatsObject) GetTimerAverages() map[string]float64 {
 	defer s.parent.RUnlock()
 
 	averages := map[string]float64{}
-
 	{{range $timer := .Stats.Timers}}
 	{{$timer.Name}}s := s.timers.{{$timer.Name}}.All()
 	if len({{$timer.Name}}s) > 0 {
@@ -255,8 +240,7 @@ func (s *cbgenStatsObject) GetTimerAverages() map[string]float64 {
 		}
 		{{$timer.Name}}Avg := {{$timer.Name}}Sum / float64(len({{$timer.Name}}s))
 		averages["{{$timer.Name}}"] = {{$timer.Name}}Avg
-	}
-	{{end}}
+	}{{end}}
 
 	return averages
 }
