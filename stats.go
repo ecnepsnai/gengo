@@ -64,6 +64,13 @@ type Counter struct {
 	Description string `json:"description" yaml:"description"`
 }
 
+// TimedCounter describes a TimedCounter object
+type TimedCounter struct {
+	Name        string `json:"name" yaml:"name"`
+	Description string `json:"description" yaml:"description"`
+	MaxMinutes  int    `json:"max_minutes" yaml:"max_minutes"`
+}
+
 // Timer describes a Timer object
 type Timer struct {
 	Name        string `json:"name" yaml:"name"`
@@ -72,6 +79,7 @@ type Timer struct {
 
 // Stats describes a Stats object
 type Stats struct {
-	Counters []Counter `json:"counters" yaml:"counters"`
-	Timers   []Timer   `json:"timers" yaml:"timers"`
+	Counters      []Counter      `json:"counters" yaml:"counters"`
+	TimedCounters []TimedCounter `json:"timed_counters" yaml:"timed_counters"`
+	Timers        []Timer        `json:"timers" yaml:"timers"`
 }

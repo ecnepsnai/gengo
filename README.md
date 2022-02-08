@@ -212,7 +212,7 @@ Options go into the `state.json` file.
 
 ## Stats
 
-Stats provides a statistics tracking interface for your application. It is broken up into two primary uses: counters and timers. Counters provide a simeple incrementer/decrementer to track a value. They always start at 0. Timers provide a way to track the time of an operation, and to get the average time of recent operations.
+Stats provides an interface to the github.com/ecnepsnai/stats package.
 
 ### Config
 
@@ -221,9 +221,13 @@ Options go into the `stats.json` file.
 |Property|Type|Description|
 |-|-|-|
 |`counters`|Array|The counters|
+|`timed_counters`|Array|The timed counters|
 |`timers`|Array|The timers|
 |`counters.name`|String|The name of this counter|
 |`counters.description`|String|The description of this counter|
+|`timed_counters.name`|String|The name of this counter|
+|`timed_counters.description`|String|The description of this counter|
+|`timed_counters.max_minutes`|String|The maximum number of minutes for samples to be retained|
 |`timers.name`|String|The name of this timer|
 |`timers.description`|String|The description of this timer|
 
@@ -237,6 +241,13 @@ Options go into the `stats.json` file.
             "description": "The number of users"
         }
     ],
+    "timed_counters": [
+        {
+            "name": "FailedRequests",
+            "description": "The number of failed requests",
+            "max_minutes": 1440
+        }
+    ],
     "timers": [
         {
             "name": "BuildDuration",
@@ -248,20 +259,17 @@ Options go into the `stats.json` file.
 
 ### Output
 
-- `type Counters struct { <counter name> uint64 ... }`: All of your counters and their values
-- `type Timers struct { <timer name> *ring.Ring ... }`: All of your timer samples
+- `type cbgenStatsCounters struct { <counter name> *stats.Counter ... }`: All of your counter
+- `type cbgenStatsTimedCounters struct { <counter name> *stats.TimedCounter ... }`: All of your timed counters
+- `type cbgenStatsTimers struct { <timer name> *stats.Timer ... }`: All of your timers
 - `var Stats *cbgenStatsObject`: The global stats object
 - `func statsSetup()`: Method to set up the stats interface
 - `func (s *cbgenStatsObject) Reset()`: Reset all counters to their default values
-- `func (s *cbgenStatsObject) Save(fileName string) error`: Write all stat values to the given file name
-- `func (s *cbgenStatsObject) Load(fileName string) error`: Set all stats values to the data in file name
-- `func (s *cbgenStatsObject) Increment<counter name>()`: Increment the counter by 1
-- `func (s *cbgenStatsObject) Decrement<counter name>()`: Decrement the counter by 1
-- `func (s *cbgenStatsObject) Set<counter name>(newVal uint64)`: Set the value of the counter
-- `func (s *cbgenStatsObject) Add<timer name>(value time.Duration)`: Add a sample to the timer
-- `func (s *cbgenStatsObject) Average<timer name>() float64`: Get the average value for this timer
-- `func (s *cbgenStatsObject) All<timer name>Samples() []float64`: Get all samples for the timer
-- `func (s *cbgenStatsObject) GetTimerAverages() map[string]float64`: Get the averages for all timers
+- `func (s *cbgenStatsObject) GetCounterValues()`: Get a map of all counter values
+- `func (s *cbgenStatsObject) GetTimedCounterValues()`: Get a map of all timed counter values
+- `func (s *cbgenStatsObject) GetTimedCounterValuesFrom(d time.Duration)`: Get a map of all timed counter values from d
+- `func (s *cbgenStatsObject) GetTimerAverages()`: Get a map of all timer averages
+- `func (s *cbgenStatsObject) GetTimerValues()`: Get a map of all timer values
 
 ## Store
 
