@@ -11,7 +11,7 @@ import (
 )
 
 // Version the current version of Codegen
-var Version = "v1.9.0"
+var Version = "v1.10.0"
 
 func main() {
 	if len(os.Args) <= 1 {
@@ -21,16 +21,12 @@ func main() {
 	args := os.Args[1:]
 
 	var packageName string
-	var packageVersion string
 
 	i := 0
 	for i < len(args) {
 		arg := args[i]
 		if arg == "-n" || arg == "--name" {
 			packageName = args[i+1]
-			i++
-		} else if arg == "-v" || arg == "--version" {
-			packageVersion = args[i+1]
 			i++
 		} else {
 			fmt.Printf("Unknown argument '%s'\n", arg)
@@ -46,31 +42,27 @@ func main() {
 	}
 
 	Generate(Options{
-		PackageName:    packageName,
-		PackageVersion: packageVersion,
-		MetaInfo:       meta,
+		PackageName: packageName,
+		MetaInfo:    meta,
 	})
 }
 
 func printHelpAndExit() {
-	fmt.Printf("Usage: %s -n <package name> [-v <package version]\n", os.Args[0])
+	fmt.Printf("Usage: %s -n <package name>\n", os.Args[0])
 	fmt.Printf("-n --name\tPackage name\n")
-	fmt.Printf("-v --version\tPackage version. Including will generate a version go file\n")
 	os.Exit(1)
 }
 
 // Options describes CodeGen options
 type Options struct {
-	PackageName    string
-	PackageVersion string
-	MetaInfo       MetaInfo
+	PackageName string
+	MetaInfo    MetaInfo
 }
 
 // Generate run the generator with the given options. Outputs files in the current working directory
 func Generate(options Options) {
 	type genFunc func(Options)
 	ops := []genFunc{
-		GenerateVersion,
 		GenerateDirectory,
 		GenerateState,
 		GenerateStore,

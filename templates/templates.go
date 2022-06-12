@@ -24,6 +24,3 @@ var Stats string
 
 //go:embed store.tmpl
 var Store string
-
-//go:embed version.tmpl
-var Version string

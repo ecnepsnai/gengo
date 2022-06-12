@@ -10,7 +10,6 @@ gob registrations, a state store, a statistics tracker, a basic store, and versi
 ```
 Usage: cbgen -n <package name> [-v <package version]
 -n --name     Package name
--v --version  Package version. Including will generate a version go file
 ```
 
 Ensure that your $GOBIN is in your $PATH and run `cbgen` in the directory where your configuration JSON files are.

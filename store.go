@@ -51,6 +51,7 @@ func GenerateStore(options Options) {
 	var extraImports []string
 	for i, store := range stores {
 		store.LowercaseName = strings.ToLower(store.Name)
+		//lint:ignore SA1019 Puncuation not supported anyways
 		store.TitlecaseName = strings.Title(store.Name)
 		stores[i] = store
 
