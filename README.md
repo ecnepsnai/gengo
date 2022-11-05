@@ -281,6 +281,7 @@ Options go into the `store.json` file.
 |Property|Type|Description|
 |-|-|-|
 |`name`|String|The name of this store|
+|`bucket_name`|String|Optional, specify the name of the bucket. Defaults to the name of the store.|
 |`gobs`|Array|Optional, any extra types to register with gob|
 |`extra_imports`|Array|Optional, any extra imports include for those types|
 

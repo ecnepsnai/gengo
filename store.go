@@ -91,6 +91,7 @@ func GenerateStore(options Options) {
 // Store describes a store type
 type Store struct {
 	Name          string `json:"name" yaml:"name"`
+	BucketName    string `json:"bucket_name" yaml:"bucket_name"`
 	LowercaseName string
 	TitlecaseName string
 	Interfaces    []string   `json:"gobs" yaml:"gobs"`
