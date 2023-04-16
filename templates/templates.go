@@ -13,6 +13,9 @@ var DirectoryGo string
 //go:embed enum.go.tmpl
 var EnumGo string
 
+//go:embed enum.ts.tmpl
+var EnumTs string
+
 //go:embed gob.go.tmpl
 var GobGo string
 

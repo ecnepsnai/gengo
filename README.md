@@ -1,9 +1,11 @@
 # cbgen
 
-CBgen is yet Golang code generator, because there aren't enough of those already.
+CBgen is yet another Golang code generator, because there aren't enough of those already.
 
 It can generate the following things: github.com/ecnepsnai/ds implementations, directory utilities, enums,
-gob registrations, a state store, a statistics tracker, a basic store, and version tracking.
+gob registrations, a state store, a statistics tracker, github.com/ecnepsnai/store implementations, and version tracking.
+
+What's CB stand for? I don't remember.
 
 # Usage
 
@@ -103,9 +105,11 @@ Options go into the `enum.json` file.
 |-|-|-|
 |`name`|String|The name of the enum. This is prefixed to all associated variables and methods for this enum|
 |`type`|String|The golang type for this enum|
+|`description`|String|Optionally provide a description for the enum overall|
+|`include_typescript`|Bool|Optionally export a typescript definition of this enum. Only supported on go primitive types|
 |`values`|Array|The possible values for this enum|
 |`values.key`|String|The key for this value|
-|`values.description`|String|The description for this value|
+|`values.description`|String|Optionally provide a description for this value|
 |`values.value`|String|The value of this enum as it would be seen in Golang code. I.E. if it's a string include quotation marks|
 
 **Example:**
@@ -136,19 +140,19 @@ Options go into the `enum.json` file.
 ]
 ```
 
+_Note how the values include quotes._
+
 ### Output
 
-- `const ( <enum name><value key> = <value> ...)`: A const of all possible enum values for this enum
-- `var All<enum name> = []<enum type>`: An array of all enum values
-- `var <enum name>Map = map[<enum type>]<enum type>`: A map of enum keys to enum values
-- `var <enum name>NameMap = map[string]<enum type>`: A map of enum names to enum values
-- `func Is<enum name>(q <enum type>) bool`: A method to validate that the given value is a valid enum value
-- `var <enum name>Schema = []map[string]interface{}`: A definition of all enums, basically just the contents of the JSON config file
-- `var AllEnums = map[string]interface{}`: All enums mapping to their name map
+- `const ( <enum name><value key> = <value> ...)`: A const of all possible enum values for this enum.
+- `var All<enum name> = []<enum type>`: An array of all enum values.
+- `var <enum name>Map = map[<enum type>]<enum type>`: A map of enum keys to enum values.
+- `func Is<enum name>(q <enum type>) bool`: A method to validate that the given value is a valid enum value.
+- `func ForEach<enum name>(m func(value <enum type>))`: A convience method to iterate over each enum value
 
 ## Gobs
 
-Gobs provide an easy way to register many objects with gob in one place, and to prevent crashing if they're already registered.
+Gobs provide an easy way to register many objects with gob in one place, and to prevent a panic if they're already registered.
 
 ### Config
 

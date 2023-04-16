@@ -1,0 +1,10 @@
+{{block "main" .}}// This file is was generated automatically by Codegen {{.Version}}
+// Do not make changes to this file as they will be lost
+
+{{range $enum := .TsEnums}}{{if $enum.Description}}/** {{$enum.Description}} */
+{{end}}export enum {{$enum.Name}} { {{range $value := .Values}}
+{{if $value.Description}}    /** {{$value.Description}} */
+{{end}}    {{$value.Key}} = {{$value.Value}},{{end}}
+}
+
+{{end}}{{end}}

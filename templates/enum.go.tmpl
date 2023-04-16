@@ -3,10 +3,10 @@
 // This file is was generated automatically by Codegen {{.CodeGen.Version}}
 // Do not make changes to this file as they will be lost
 
-{{range $enum := .Enums}}
+{{range $enum := .Enums}}{{if $enum.Description}}// {{$enum.Description}}{{end}}
 const ({{range $value := .Values}}
-	// {{$enum.Name}}{{$value.Key}} {{$value.Description}}
-	{{$enum.Name}}{{$value.Key}} = {{$value.Value}}{{end}}
+{{if $value.Description}}	// {{$value.Description}}
+{{end}}	{{$enum.Name}}{{$value.Key}} = {{$value.Value}}{{end}}
 )
 
 // All{{$enum.Name}} all {{$enum.Name}} values
@@ -17,11 +17,6 @@ var All{{$enum.Name}} = []{{$enum.Type}}{ {{range $value := .Values}}
 // {{$enum.Name}}Map map {{$enum.Name}} keys to values
 var {{$enum.Name}}Map = map[{{$enum.Type}}]{{$enum.Type}}{ {{range $value := .Values}}
 	{{$enum.Name}}{{$value.Key}}: {{$value.Value}}, {{end}}
-}
-
-// {{$enum.Name}}NameMap map {{$enum.Name}} keys to values
-var {{$enum.Name}}NameMap = map[string]{{$enum.Type}}{ {{range $value := .Values}}
-	"{{$value.Key}}": {{$value.Value}}, {{end}}
 }
 
 // Is{{$enum.Name}} is the provided value a valid {{$enum.Name}}
@@ -37,20 +32,4 @@ func ForEach{{$enum.Name}}(m func(value {{$enum.Type}})) {
 	}
 }
 
-// {{$enum.Name}}Schema the {{$enum.Name}} schema.
-var {{$enum.Name}}Schema = []map[string]interface{}{ {{range $value := .Values}}
-	{
-		"name":        "{{$value.Title}}",
-		"description": "{{$value.Description}}",
-		"value":       {{$value.Value}},
-	},{{end}}
-}
-
-{{end}}
-
-// AllEnums map of all enums
-var AllEnums = map[string]interface{}{ {{range $enum := .Enums}}
-	"{{$enum.Name}}": {{$enum.Name}}Schema, {{end}}
-}
-
-{{end}}
+{{end}}{{end}}
