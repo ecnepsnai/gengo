@@ -19,7 +19,7 @@ func GenerateState(options Options) {
 		return
 	}
 
-	t, _ := template.New("state").Parse(templates.State)
+	t, _ := template.New("state").Parse(templates.StateGo)
 	f, err := os.OpenFile(stateFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())

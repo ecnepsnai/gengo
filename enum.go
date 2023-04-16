@@ -25,7 +25,7 @@ func GenerateEnum(options Options) {
 		return left.Name < right.Name
 	})
 
-	t, _ := template.New("enum").Parse(templates.Enum)
+	t, _ := template.New("enum").Parse(templates.EnumGo)
 	f, err := os.OpenFile(enumFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating enum file: %s", err.Error())

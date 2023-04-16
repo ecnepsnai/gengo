@@ -19,7 +19,7 @@ func GenerateDataStore(options Options) {
 		return
 	}
 
-	t, _ := template.New("data_store").Parse(templates.DataStore)
+	t, _ := template.New("data_store").Parse(templates.DataStoreGo)
 	f, err := os.OpenFile(dataStoreFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())

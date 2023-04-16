@@ -4,23 +4,23 @@ import (
 	_ "embed"
 )
 
-//go:embed data_store.tmpl
-var DataStore string
+//go:embed data_store.go.tmpl
+var DataStoreGo string
 
-//go:embed directory.tmpl
-var Directory string
+//go:embed directory.go.tmpl
+var DirectoryGo string
 
-//go:embed enum.tmpl
-var Enum string
+//go:embed enum.go.tmpl
+var EnumGo string
 
-//go:embed gob.tmpl
-var Gob string
+//go:embed gob.go.tmpl
+var GobGo string
 
-//go:embed state.tmpl
-var State string
+//go:embed state.go.tmpl
+var StateGo string
 
-//go:embed stats.tmpl
-var Stats string
+//go:embed stats.go.tmpl
+var StatsGo string
 
-//go:embed store.tmpl
-var Store string
+//go:embed store.go.tmpl
+var StoreGo string

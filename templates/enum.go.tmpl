@@ -30,6 +30,13 @@ func Is{{$enum.Name}}(q {{$enum.Type}}) bool {
 	return k
 }
 
+// ForEach{{$enum.Name}} call m for each {{$enum.Name}}
+func ForEach{{$enum.Name}}(m func(value {{$enum.Type}})) {
+	for _, v := range All{{$enum.Name}} {
+		m(v)
+	}
+}
+
 // {{$enum.Name}}Schema the {{$enum.Name}} schema.
 var {{$enum.Name}}Schema = []map[string]interface{}{ {{range $value := .Values}}
 	{

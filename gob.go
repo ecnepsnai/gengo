@@ -31,7 +31,7 @@ func GenerateGob(options Options) {
 		return left.Type < right.Type
 	})
 
-	t, _ := template.New("gob").Parse(templates.Gob)
+	t, _ := template.New("gob").Parse(templates.GobGo)
 	f, err := os.OpenFile(gobFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())

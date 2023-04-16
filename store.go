@@ -19,7 +19,7 @@ func GenerateStore(options Options) {
 		return
 	}
 
-	t, _ := template.New("store").Parse(templates.Store)
+	t, _ := template.New("store").Parse(templates.StoreGo)
 	f, err := os.OpenFile(storeFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating store file: %s", err.Error())

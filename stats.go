@@ -31,7 +31,7 @@ func GenerateStats(options Options) {
 		return left.Name < right.Name
 	})
 
-	t, _ := template.New("stats").Parse(templates.Stats)
+	t, _ := template.New("stats").Parse(templates.StatsGo)
 	f, err := os.OpenFile(statsFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating stats file: %s", err.Error())

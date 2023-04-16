@@ -25,7 +25,7 @@ func GenerateDirectory(options Options) {
 		return left.Name < right.Name
 	})
 
-	t, _ := template.New("directory").Parse(templates.Directory)
+	t, _ := template.New("directory").Parse(templates.DirectoryGo)
 	f, err := os.OpenFile(directoryFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating directory file: %s", err.Error())
