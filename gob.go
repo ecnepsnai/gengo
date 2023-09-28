@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"sort"
 	"text/template"
 
@@ -14,7 +15,7 @@ const gobFileName = "cbgen_gob.go"
 // GenerateGob generate gob
 func GenerateGob(options Options) {
 	var gobs []Gob
-	if !loadConfig("gob", &gobs) {
+	if !loadConfig(options.ConfigDir, "gob", &gobs) {
 		return
 	}
 
@@ -32,7 +33,7 @@ func GenerateGob(options Options) {
 	})
 
 	t, _ := template.New("gob").Parse(templates.GobGo)
-	f, err := os.OpenFile(gobFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.OutputDir, gobFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())
 	}
@@ -52,12 +53,12 @@ func GenerateGob(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())
 	}
-	err = os.Rename(gobFileName+"~", gobFileName)
+	err = os.Rename(path.Join(options.OutputDir, gobFileName+"~"), path.Join(options.OutputDir, gobFileName))
 	if err != nil {
 		log.Fatalf("Error generating gob file: %s", err.Error())
 	}
 
-	goFmt(gobFileName)
+	goFmt(path.Join(options.OutputDir, gobFileName))
 }
 
 // Gob describes an gob type

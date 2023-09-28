@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"sort"
 	"strings"
 	"text/template"
@@ -15,12 +16,12 @@ const storeFileName = "cbgen_store.go"
 // GenerateStore generates the store file
 func GenerateStore(options Options) {
 	var stores []Store
-	if !loadConfig("store", &stores) {
+	if !loadConfig(options.ConfigDir, "store", &stores) {
 		return
 	}
 
 	t, _ := template.New("store").Parse(templates.StoreGo)
-	f, err := os.OpenFile(storeFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.OutputDir, storeFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating store file: %s", err.Error())
 	}
@@ -51,7 +52,6 @@ func GenerateStore(options Options) {
 	var extraImports []string
 	for i, store := range stores {
 		store.LowercaseName = strings.ToLower(store.Name)
-		//lint:ignore SA1019 Puncuation not supported anyways
 		store.TitlecaseName = strings.Title(store.Name)
 		stores[i] = store
 
@@ -80,12 +80,12 @@ func GenerateStore(options Options) {
 		log.Fatalf("Error generating store file: %s", err.Error())
 		defer os.Remove(f.Name())
 	}
-	err = os.Rename(storeFileName+"~", storeFileName)
+	err = os.Rename(path.Join(options.OutputDir, storeFileName+"~"), path.Join(options.OutputDir, storeFileName))
 	if err != nil {
 		log.Fatalf("Error generating store file: %s", err.Error())
 	}
 
-	goFmt(storeFileName)
+	goFmt(path.Join(options.OutputDir, storeFileName))
 }
 
 // Store describes a store type

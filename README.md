@@ -5,13 +5,15 @@ CBgen is yet another Golang code generator, because there aren't enough of those
 It can generate the following things: github.com/ecnepsnai/ds implementations, directory utilities, enums,
 gob registrations, a state store, a statistics tracker, github.com/ecnepsnai/store implementations, and version tracking.
 
-What's CB stand for? I don't remember.
+What's CB stand for? *I don't remember.*
 
 # Usage
 
 ```
-Usage: cbgen -n <package name> [-v <package version]
--n --name     Package name
+Usage: cbgen [Options]
+-n --name <name>        Package name, defaults to 'main'
+-c --config-dir <dir>   Config dir, defaults to current dir
+-o --output-dir <dir>   Output dir, defaults to current dir
 ```
 
 Ensure that your $GOBIN is in your $PATH and run `cbgen` in the directory where your configuration JSON files are.

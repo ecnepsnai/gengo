@@ -3,22 +3,25 @@ package main
 import (
 	"encoding/json"
 	"os"
+	"path"
 
 	"gopkg.in/yaml.v2"
 )
 
-func loadConfig(fileName string, obj interface{}) bool {
+func loadConfig(configDir, fileName string, obj interface{}) bool {
 	var f *os.File
 	var err error
 	isJSON := false
 
-	if fileExists(fileName + ".json") {
-		f, err = os.Open(fileName + ".json")
+	filePath := path.Join(configDir, fileName)
+
+	if fileExists(filePath + ".json") {
+		f, err = os.Open(filePath + ".json")
 		isJSON = true
-	} else if fileExists(fileName + ".yml") {
-		f, err = os.Open(fileName + ".yml")
-	} else if fileExists(fileName + ".yaml") {
-		f, err = os.Open(fileName + ".yaml")
+	} else if fileExists(filePath + ".yml") {
+		f, err = os.Open(filePath + ".yml")
+	} else if fileExists(filePath + ".yaml") {
+		f, err = os.Open(filePath + ".yaml")
 	} else {
 		return false
 	}

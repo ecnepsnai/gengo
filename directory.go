@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"sort"
 	"text/template"
 
@@ -14,7 +15,7 @@ const directoryFileName = "cbgen_directory.go"
 // GenerateDirectory generates directory file
 func GenerateDirectory(options Options) {
 	var directories []Directory
-	if !loadConfig("directory", &directories) {
+	if !loadConfig(options.ConfigDir, "directory", &directories) {
 		return
 	}
 
@@ -26,7 +27,7 @@ func GenerateDirectory(options Options) {
 	})
 
 	t, _ := template.New("directory").Parse(templates.DirectoryGo)
-	f, err := os.OpenFile(directoryFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.OutputDir, directoryFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating directory file: %s", err.Error())
 	}
@@ -44,7 +45,7 @@ func GenerateDirectory(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating directory file: %s", err.Error())
 	}
-	err = os.Rename(directoryFileName+"~", directoryFileName)
+	err = os.Rename(path.Join(options.OutputDir, directoryFileName+"~"), path.Join(options.OutputDir, directoryFileName))
 	if err != nil {
 		log.Fatalf("Error generating directory file: %s", err.Error())
 	}

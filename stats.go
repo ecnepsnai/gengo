@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"sort"
 	"text/template"
 
@@ -14,7 +15,7 @@ const statsFileName = "cbgen_stats.go"
 // GenerateStats generates the stats file
 func GenerateStats(options Options) {
 	var stats Stats
-	if !loadConfig("stats", &stats) {
+	if !loadConfig(options.ConfigDir, "stats", &stats) {
 		return
 	}
 
@@ -32,7 +33,7 @@ func GenerateStats(options Options) {
 	})
 
 	t, _ := template.New("stats").Parse(templates.StatsGo)
-	f, err := os.OpenFile(statsFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.OutputDir, statsFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating stats file: %s", err.Error())
 	}
@@ -50,12 +51,12 @@ func GenerateStats(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating stats file: %s", err.Error())
 	}
-	err = os.Rename(statsFileName+"~", statsFileName)
+	err = os.Rename(path.Join(options.OutputDir, statsFileName+"~"), path.Join(options.OutputDir, statsFileName))
 	if err != nil {
 		log.Fatalf("Error generating stats file: %s", err.Error())
 	}
 
-	goFmt(statsFileName)
+	goFmt(path.Join(options.OutputDir, statsFileName))
 }
 
 // Counter describes a Counter object

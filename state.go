@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"sort"
 	"strings"
 	"text/template"
@@ -15,12 +16,12 @@ const stateFileName = "cbgen_state.go"
 // GenerateState generates the state store
 func GenerateState(options Options) {
 	var states []StateProperty
-	if !loadConfig("state", &states) {
+	if !loadConfig(options.ConfigDir, "state", &states) {
 		return
 	}
 
 	t, _ := template.New("state").Parse(templates.StateGo)
-	f, err := os.OpenFile(stateFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.OutputDir, stateFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())
 	}
@@ -82,12 +83,12 @@ func GenerateState(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())
 	}
-	err = os.Rename(stateFileName+"~", stateFileName)
+	err = os.Rename(path.Join(options.OutputDir, stateFileName+"~"), path.Join(options.OutputDir, stateFileName))
 	if err != nil {
 		log.Fatalf("Error generating state file: %s", err.Error())
 	}
 
-	goFmt(stateFileName)
+	goFmt(path.Join(options.OutputDir, stateFileName))
 }
 
 // StateProperty describes a state property

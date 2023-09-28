@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"sort"
 	"text/template"
 
@@ -15,7 +16,7 @@ const enumTsFileName = "cbgen_enum.ts"
 // GenerateEnum generate enums and schemas
 func GenerateEnum(options Options) {
 	var enums []Enum
-	if !loadConfig("enum", &enums) {
+	if !loadConfig(options.ConfigDir, "enum", &enums) {
 		return
 	}
 
@@ -32,7 +33,7 @@ func GenerateEnum(options Options) {
 	})
 
 	goTemplate, _ := template.New("enum").Parse(templates.EnumGo)
-	f, err := os.OpenFile(enumGoFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.OutputDir, enumGoFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating enum go file: %s", err.Error())
 	}
@@ -50,19 +51,19 @@ func GenerateEnum(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating enum go file: %s", err.Error())
 	}
-	err = os.Rename(enumGoFileName+"~", enumGoFileName)
+	err = os.Rename(path.Join(options.OutputDir, enumGoFileName+"~"), path.Join(options.OutputDir, enumGoFileName))
 	if err != nil {
 		log.Fatalf("Error generating enum go file: %s", err.Error())
 	}
 
-	goFmt(enumGoFileName)
+	goFmt(path.Join(options.OutputDir, enumGoFileName))
 
 	if !exportTs {
 		return
 	}
 
 	tsTemplate, _ := template.New("enum").Parse(templates.EnumTs)
-	f, err = os.OpenFile(enumTsFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err = os.OpenFile(path.Join(options.OutputDir, enumTsFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating enum ts file: %s", err.Error())
 	}
@@ -97,7 +98,7 @@ func GenerateEnum(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating enum ts file: %s", err.Error())
 	}
-	err = os.Rename(enumTsFileName+"~", enumTsFileName)
+	err = os.Rename(path.Join(options.OutputDir, enumTsFileName+"~"), path.Join(options.OutputDir, enumTsFileName))
 	if err != nil {
 		log.Fatalf("Error generating enum ts file: %s", err.Error())
 	}

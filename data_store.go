@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"path"
 	"sort"
 	"strings"
 	"text/template"
@@ -15,12 +16,12 @@ const dataStoreFileName = "cbgen_data_store.go"
 // GenerateDataStore generates the data store file
 func GenerateDataStore(options Options) {
 	var stores []DataStore
-	if !loadConfig("data_store", &stores) {
+	if !loadConfig(options.ConfigDir, "data_store", &stores) {
 		return
 	}
 
 	t, _ := template.New("data_store").Parse(templates.DataStoreGo)
-	f, err := os.OpenFile(dataStoreFileName+"~", os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.OutputDir, dataStoreFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())
 	}
@@ -29,7 +30,6 @@ func GenerateDataStore(options Options) {
 	var extraImports []string
 	for i, store := range stores {
 		store.LowercaseName = strings.ToLower(store.Name)
-		//lint:ignore SA1019 Puncuation not supported anyways
 		store.TitlecaseName = strings.Title(store.Name)
 		stores[i] = store
 	}
@@ -54,12 +54,12 @@ func GenerateDataStore(options Options) {
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())
 	}
-	err = os.Rename(dataStoreFileName+"~", dataStoreFileName)
+	err = os.Rename(path.Join(options.OutputDir, dataStoreFileName+"~"), path.Join(options.OutputDir, dataStoreFileName))
 	if err != nil {
 		log.Fatalf("Error generating data store file: %s", err.Error())
 	}
 
-	goFmt(dataStoreFileName)
+	goFmt(path.Join(options.OutputDir, dataStoreFileName))
 }
 
 // DataStore describes a data store type

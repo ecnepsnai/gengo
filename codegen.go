@@ -11,7 +11,7 @@ import (
 )
 
 // Version the current version of Codegen
-var Version = "v1.11.0"
+var Version = "v1.12.0"
 
 func main() {
 	if len(os.Args) <= 1 {
@@ -20,13 +20,21 @@ func main() {
 
 	args := os.Args[1:]
 
-	var packageName string
+	packageName := "main"
+	configDir := "."
+	outputDir := "."
 
 	i := 0
 	for i < len(args) {
 		arg := args[i]
 		if arg == "-n" || arg == "--name" {
 			packageName = args[i+1]
+			i++
+		} else if arg == "-c" || arg == "--config-dir" {
+			configDir = args[i+1]
+			i++
+		} else if arg == "-o" || arg == "--output-dir" {
+			outputDir = args[i+1]
 			i++
 		} else {
 			fmt.Printf("Unknown argument '%s'\n", arg)
@@ -43,19 +51,25 @@ func main() {
 
 	Generate(Options{
 		PackageName: packageName,
+		ConfigDir:   configDir,
+		OutputDir:   outputDir,
 		MetaInfo:    meta,
 	})
 }
 
 func printHelpAndExit() {
-	fmt.Printf("Usage: %s -n <package name>\n", os.Args[0])
-	fmt.Printf("-n --name\tPackage name\n")
+	fmt.Printf("Usage: %s [Options]\n", os.Args[0])
+	fmt.Printf("-n --name <name>        Package name, defaults to 'main'\n")
+	fmt.Printf("-c --config-dir <dir>   Config dir, defaults to current dir\n")
+	fmt.Printf("-o --output-dir <dir>   Output dir, defaults to current dir\n")
 	os.Exit(1)
 }
 
 // Options describes CodeGen options
 type Options struct {
 	PackageName string
+	ConfigDir   string
+	OutputDir   string
 	MetaInfo    MetaInfo
 }
 
