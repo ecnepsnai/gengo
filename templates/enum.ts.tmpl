@@ -7,4 +7,20 @@
 {{end}}    {{$value.Key}} = {{$value.Value}},{{end}}
 }
 
+export function {{$enum.Name}}All() {
+    return [ {{range $value := .Values}}
+        {{$enum.Name}}.{{$value.Key}},{{end}}
+    ];
+}
+
+export function {{$enum.Name}}Config() {
+    return [{{range $value := .Values}}
+        {
+            key: '{{$value.Key}}',
+            value: {{$value.Value}},
+            {{if $value.Description}}description: '{{$value.Description}}',{{end}}
+        },{{end}}
+    ];
+}
+
 {{end}}{{end}}

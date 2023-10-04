@@ -146,11 +146,19 @@ _Note how the values include quotes._
 
 ### Output
 
+#### Go
+
 - `const ( <enum name><value key> = <value> ...)`: A const of all possible enum values for this enum.
 - `var All<enum name> = []<enum type>`: An array of all enum values.
 - `var <enum name>Map = map[<enum type>]<enum type>`: A map of enum keys to enum values.
 - `func Is<enum name>(q <enum type>) bool`: A method to validate that the given value is a valid enum value.
 - `func ForEach<enum name>(m func(value <enum type>))`: A convience method to iterate over each enum value
+
+#### TypeScript
+
+- `export enum <enum name>`: An exported enum definition for this enum.
+- `export function <enum name>All()`: An exported function that returns an array of all enum values.
+- `export function <enum name>Config()`: An exported function that returns an array of objects that describe the enum.
 
 ## Gobs
 
