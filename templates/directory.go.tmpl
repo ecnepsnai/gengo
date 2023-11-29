@@ -23,13 +23,9 @@ var operatingDirectory = getAPIOperatingDir()
 var dataDirectory = getAPIOperatingDir()
 
 type apiDirectories struct {
-	Base      string
-	{{range $dir := .Directories}}
-		{{$dir.Name}} string
-		{{range $subdir := $dir.SubDirectories}}
-			{{$subdir.Name}} string
-		{{end}}
-	{{end}}
+	Base      string{{range $dir := .Directories}}
+	{{$dir.Name}} string{{range $subdir := $dir.SubDirectories}}
+{{$subdir.Name}} string{{end}}{{end}}
 }
 
 // Directories absolute paths of API related directires.
@@ -38,42 +34,41 @@ var Directories = apiDirectories{}
 func fsSetup() {
 	Directories = apiDirectories{
 		Base:      operatingDirectory,
-		{{range $dir := .Directories}}
-			{{if $dir.IsData}}
-			{{$dir.Name}}:    path.Join(dataDirectory, "{{$dir.DirectoryName}}"),
-			{{else}}
-			{{$dir.Name}}:    path.Join(operatingDirectory, "{{$dir.DirectoryName}}"),
-			{{end}}
-			{{range $subdir := $dir.SubDirectories}}
-				{{if $dir.IsData}}
-				{{$subdir.Name}}:    path.Join(dataDirectory, "{{$dir.DirectoryName}}", "{{$subdir.DirectoryName}}"),
-				{{else}}
-				{{$subdir.Name}}:    path.Join(operatingDirectory, "{{$dir.DirectoryName}}", "{{$subdir.DirectoryName}}"),
-				{{end}}
-			{{end}}
-		{{end}}
-	}
 	{{range $dir := .Directories}}
-		{{if $dir.Required}}
-			if !DirectoryExists(Directories.{{$dir.Name}}) {
-				fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.{{$dir.Name}})
-				os.Exit(1)
-			}
+		{{if $dir.IsData}}
+		{{$dir.Name}}:    path.Join(dataDirectory, "{{$dir.DirectoryName}}"),
 		{{else}}
-			MakeDirectoryIfNotExist(Directories.{{$dir.Name}})
+		{{$dir.Name}}:    path.Join(operatingDirectory, "{{$dir.DirectoryName}}"),
 		{{end}}
-
 		{{range $subdir := $dir.SubDirectories}}
-			{{if $subdir.Required}}
-				if !DirectoryExists(Directories.{{$subdir.Name}}) {
-					fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.{{$subdir.Name}})
-					os.Exit(1)
-				}
+			{{if $dir.IsData}}
+			{{$subdir.Name}}:    path.Join(dataDirectory, "{{$dir.DirectoryName}}", "{{$subdir.DirectoryName}}"),
 			{{else}}
-				MakeDirectoryIfNotExist(Directories.{{$subdir.Name}})
+			{{$subdir.Name}}:    path.Join(operatingDirectory, "{{$dir.DirectoryName}}", "{{$subdir.DirectoryName}}"),
 			{{end}}
 		{{end}}
 	{{end}}
+	}
+{{range $dir := .Directories}}
+	{{if $dir.Required}}
+		if !DirectoryExists(Directories.{{$dir.Name}}) {
+			fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.{{$dir.Name}})
+			os.Exit(1)
+		}
+	{{else}}
+		MakeDirectoryIfNotExist(Directories.{{$dir.Name}})
+	{{end}}
+	{{range $subdir := $dir.SubDirectories}}
+		{{if $subdir.Required}}
+			if !DirectoryExists(Directories.{{$subdir.Name}}) {
+				fmt.Fprintf(os.Stderr, "Required directory '%s' does not exist.\n", Directories.{{$subdir.Name}})
+				os.Exit(1)
+			}
+		{{else}}
+			MakeDirectoryIfNotExist(Directories.{{$subdir.Name}})
+		{{end}}
+	{{end}}
+{{end}}
 }
 
 // DirectoryExists does the given directory exist (and is it a directory)
