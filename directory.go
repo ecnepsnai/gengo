@@ -50,7 +50,7 @@ func GenerateDirectory(options Options) {
 		log.Fatalf("Error generating directory file: %s", err.Error())
 	}
 
-	goFmt(directoryFileName)
+	goFmt(path.Join(options.OutputDir, directoryFileName))
 }
 
 // Directory describes a directory object

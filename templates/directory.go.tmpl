@@ -25,7 +25,7 @@ var dataDirectory = getAPIOperatingDir()
 type apiDirectories struct {
 	Base      string{{range $dir := .Directories}}
 	{{$dir.Name}} string{{range $subdir := $dir.SubDirectories}}
-{{$subdir.Name}} string{{end}}{{end}}
+    {{$subdir.Name}} string{{end}}{{end}}
 }
 
 // Directories absolute paths of API related directires.
