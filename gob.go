@@ -1,22 +1,25 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"path"
 	"sort"
 	"text/template"
 
-	"github.com/ecnepsnai/cbgen/templates"
+	"github.com/ecnepsnai/gengo/templates"
 )
 
-const gobFileName = "cbgen_gob.go"
+type TGobGenerator struct{}
 
-// GenerateGob generate gob
-func GenerateGob(options Options) {
+var GobGenerator = &TGobGenerator{}
+
+func (g *TGobGenerator) Generate(options Options) (*GeneratorResult, error) {
+	gobFileName := fmt.Sprintf("%sgob.go", options.FilePrefix)
+
 	var gobs []Gob
 	if !loadConfig(options.ConfigDir, "gob", &gobs) {
-		return
+		return nil, nil
 	}
 
 	var imports = map[string]bool{}
@@ -33,32 +36,34 @@ func GenerateGob(options Options) {
 	})
 
 	t, _ := template.New("gob").Parse(templates.GobGo)
-	f, err := os.OpenFile(path.Join(options.OutputDir, gobFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.TempDir, gobFileName), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatalf("Error generating gob file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", gobFileName, err.Error())
+		return nil, err
 	}
 	defer f.Close()
 
 	err = t.ExecuteTemplate(f, "main", struct {
-		CodeGen     MetaInfo
+		GenGo       MetaInfo
 		PackageName string
 		Gobs        []Gob
 		Imports     []string
 	}{
-		CodeGen:     options.MetaInfo,
+		GenGo:       options.MetaInfo,
 		PackageName: options.PackageName,
 		Gobs:        gobs,
 		Imports:     mapKeys(imports),
 	})
 	if err != nil {
-		log.Fatalf("Error generating gob file: %s", err.Error())
-	}
-	err = os.Rename(path.Join(options.OutputDir, gobFileName+"~"), path.Join(options.OutputDir, gobFileName))
-	if err != nil {
-		log.Fatalf("Error generating gob file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", gobFileName, err.Error())
+		return nil, err
 	}
 
-	goFmt(path.Join(options.OutputDir, gobFileName))
+	return &GeneratorResult{
+		GoFiles: []string{
+			gobFileName,
+		},
+	}, nil
 }
 
 // Gob describes an gob type

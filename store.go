@@ -1,29 +1,33 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"path"
 	"sort"
 	"strings"
 	"text/template"
 
-	"github.com/ecnepsnai/cbgen/templates"
+	"github.com/ecnepsnai/gengo/templates"
 )
 
-const storeFileName = "cbgen_store.go"
+type TStoreGenerator struct{}
 
-// GenerateStore generates the store file
-func GenerateStore(options Options) {
+var StoreGenerator = &TStoreGenerator{}
+
+func (g *TStoreGenerator) Generate(options Options) (*GeneratorResult, error) {
+	storeFileName := fmt.Sprintf("%sstore.go", options.FilePrefix)
+
 	var stores []Store
 	if !loadConfig(options.ConfigDir, "store", &stores) {
-		return
+		return nil, nil
 	}
 
 	t, _ := template.New("store").Parse(templates.StoreGo)
-	f, err := os.OpenFile(path.Join(options.OutputDir, storeFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.TempDir, storeFileName), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatalf("Error generating store file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", storeFileName, err.Error())
+		return nil, err
 	}
 	defer f.Close()
 
@@ -66,26 +70,26 @@ func GenerateStore(options Options) {
 	})
 
 	err = t.ExecuteTemplate(f, "main", struct {
-		CodeGen      MetaInfo
+		GenGo        MetaInfo
 		PackageName  string
 		Stores       []Store
 		ExtraImports []string
 	}{
-		CodeGen:      options.MetaInfo,
+		GenGo:        options.MetaInfo,
 		PackageName:  options.PackageName,
 		Stores:       stores,
 		ExtraImports: extraImports,
 	})
 	if err != nil {
-		log.Fatalf("Error generating store file: %s", err.Error())
-		defer os.Remove(f.Name())
-	}
-	err = os.Rename(path.Join(options.OutputDir, storeFileName+"~"), path.Join(options.OutputDir, storeFileName))
-	if err != nil {
-		log.Fatalf("Error generating store file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", storeFileName, err.Error())
+		return nil, err
 	}
 
-	goFmt(path.Join(options.OutputDir, storeFileName))
+	return &GeneratorResult{
+		GoFiles: []string{
+			storeFileName,
+		},
+	}, nil
 }
 
 // Store describes a store type

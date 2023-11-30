@@ -1,4 +1,4 @@
-module github.com/ecnepsnai/cbgen
+module github.com/ecnepsnai/gengo
 
 go 1.16
 

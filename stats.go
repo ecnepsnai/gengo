@@ -1,22 +1,25 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"path"
 	"sort"
 	"text/template"
 
-	"github.com/ecnepsnai/cbgen/templates"
+	"github.com/ecnepsnai/gengo/templates"
 )
 
-const statsFileName = "cbgen_stats.go"
+type TStatsGenerator struct{}
 
-// GenerateStats generates the stats file
-func GenerateStats(options Options) {
+var StatsGenerator = &TStatsGenerator{}
+
+func (g *TStatsGenerator) Generate(options Options) (*GeneratorResult, error) {
+	statsFileName := fmt.Sprintf("%sstats.go", options.FilePrefix)
+
 	var stats Stats
 	if !loadConfig(options.ConfigDir, "stats", &stats) {
-		return
+		return nil, nil
 	}
 
 	sort.Slice(stats.Counters, func(l, r int) bool {
@@ -33,30 +36,32 @@ func GenerateStats(options Options) {
 	})
 
 	t, _ := template.New("stats").Parse(templates.StatsGo)
-	f, err := os.OpenFile(path.Join(options.OutputDir, statsFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.TempDir, statsFileName), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatalf("Error generating stats file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", statsFileName, err.Error())
+		return nil, err
 	}
 	defer f.Close()
 
 	err = t.ExecuteTemplate(f, "main", struct {
-		CodeGen     MetaInfo
+		GenGo       MetaInfo
 		PackageName string
 		Stats       Stats
 	}{
-		CodeGen:     options.MetaInfo,
+		GenGo:       options.MetaInfo,
 		PackageName: options.PackageName,
 		Stats:       stats,
 	})
 	if err != nil {
-		log.Fatalf("Error generating stats file: %s", err.Error())
-	}
-	err = os.Rename(path.Join(options.OutputDir, statsFileName+"~"), path.Join(options.OutputDir, statsFileName))
-	if err != nil {
-		log.Fatalf("Error generating stats file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", statsFileName, err.Error())
+		return nil, err
 	}
 
-	goFmt(path.Join(options.OutputDir, statsFileName))
+	return &GeneratorResult{
+		GoFiles: []string{
+			statsFileName,
+		},
+	}, nil
 }
 
 // Counter describes a Counter object

@@ -1,6 +1,6 @@
 {{block "main" .}}package {{.PackageName}}
 
-// This file is was generated automatically by Codegen {{.CodeGen.Version}}
+// This file is was generated automatically by GenGo {{.GenGo.Version}}
 // Do not make changes to this file as they will be lost
 
 import (
@@ -15,8 +15,8 @@ type {{$store.LowercaseName}}StoreObject struct { Table *ds.Table }
 // {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
 var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{}
 
-func cbgenDataStoreRegister{{$store.TitlecaseName}}Store() {
-	table, err := ds.Register({{$store.Object}}{}, path.Join(Directories.Data, "{{$store.LowercaseName}}.db"), &ds.Options{ {{if $store.Unordered}}DisableSorting: true{{end}} })
+func gengoDataStoreRegister{{$store.TitlecaseName}}Store(storageDir string) {
+	table, err := ds.Register({{$store.Object}}{}, path.Join(storageDir, "{{$store.LowercaseName}}.db"), &ds.Options{ {{if $store.Unordered}}DisableSorting: true{{end}} })
 	if err != nil {
 		log.Fatal("Error registering {{$store.LowercaseName}} store: %s", err.Error())
 	}
@@ -25,8 +25,8 @@ func cbgenDataStoreRegister{{$store.TitlecaseName}}Store() {
 {{end}}
 
 // dataStoreSetup set up the data store
-func dataStoreSetup() { {{range $store := .Stores}}
-	cbgenDataStoreRegister{{$store.TitlecaseName}}Store(){{end}}
+func dataStoreSetup(storageDir string) { {{range $store := .Stores}}
+	gengoDataStoreRegister{{$store.TitlecaseName}}Store(storageDir){{end}}
 }
 
 // dataStoreTeardown tear down the data store

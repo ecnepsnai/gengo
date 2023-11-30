@@ -1,6 +1,6 @@
 {{block "main" .}}package {{.PackageName}}
 
-// This file is was generated automatically by Codegen {{.CodeGen.Version}}
+// This file is was generated automatically by GenGo {{.GenGo.Version}}
 // Do not make changes to this file as they will be lost
 
 import (
@@ -14,21 +14,21 @@ import (
     {{end}}
 )
 
-type cbgenStateObject struct {
+type gengoStateObject struct {
 	store *store.Store
 	locks map[string]*sync.RWMutex
 }
 
 // State the global state object
-var State *cbgenStateObject
+var State *gengoStateObject
 
 // stateSetup load the saved state
-func stateSetup() {
-	s, err := store.New(Directories.Data, "state", nil)
+func stateSetup(storageDir string) {
+	s, err := store.New(storageDir, "state", nil)
 	if err != nil {
 		log.Fatal("Error opening state store: %s", err.Error())
 	}
-	state := cbgenStateObject{
+	state := gengoStateObject{
 		store: s,
 		locks: map[string]*sync.RWMutex{ {{range $property := .Properties}}
 				"{{$property.Name}}": {}, {{end}}
@@ -38,12 +38,12 @@ func stateSetup() {
 }
 
 // Close closes the state session
-func (s *cbgenStateObject) Close() {
+func (s *gengoStateObject) Close() {
 	s.store.Close()
 }
 
 // GetAll will return a map of all current state values
-func (s *cbgenStateObject) GetAll() map[string]interface{} {
+func (s *gengoStateObject) GetAll() map[string]interface{} {
 	return map[string]interface{}{ {{range $property := .Properties}}
 		"{{$property.Name}}": s.Get{{$property.Name}}(), {{end}}
 	}
@@ -51,7 +51,7 @@ func (s *cbgenStateObject) GetAll() map[string]interface{} {
 
 {{range $property := .Properties}}
 // Get{{$property.Name}} get the {{$property.Name}} value
-func (s *cbgenStateObject) Get{{$property.Name}}() {{$property.Type.Type}} {
+func (s *gengoStateObject) Get{{$property.Name}}() {{$property.Type.Type}} {
 	s.locks["{{$property.Name}}"].RLock()
 	defer s.locks["{{$property.Name}}"].RUnlock()
 
@@ -59,7 +59,7 @@ func (s *cbgenStateObject) Get{{$property.Name}}() {{$property.Type.Type}} {
 	if d == nil {
 		return {{$property.Default}}
 	}
-	v, err := cbgenStateDecode{{$property.Type.Name}}(d)
+	v, err := gengoStateDecode{{$property.Type.Name}}(d)
 	if err != nil {
 		log.Error("Error decoding %s value for %s: %s", "{{$property.Type.Type}}", "{{$property.Name}}", err.Error())
 		return {{$property.Default}}
@@ -69,11 +69,11 @@ func (s *cbgenStateObject) Get{{$property.Name}}() {{$property.Type.Type}} {
 }
 
 // Set{{$property.Name}} set the {{$property.Name}} value
-func (s *cbgenStateObject) Set{{$property.Name}}(value {{$property.Type.Type}}) {
+func (s *gengoStateObject) Set{{$property.Name}}(value {{$property.Type.Type}}) {
 	s.locks["{{$property.Name}}"].Lock()
 	defer s.locks["{{$property.Name}}"].Unlock()
 
-	b, err := cbgenStateEncode{{$property.Type.Name}}(value)
+	b, err := gengoStateEncode{{$property.Type.Name}}(value)
 	if err != nil {
 		log.Error("Error encoding %s value for %s: %s", "{{$property.Type.Type}}", "{{$property.Name}}", err.Error())
 		return
@@ -83,18 +83,18 @@ func (s *cbgenStateObject) Set{{$property.Name}}(value {{$property.Type.Type}}) 
 }
 
 // Default{{$property.Name}} get the default value for {{$property.Name}}
-func (s *cbgenStateObject) Default{{$property.Name}}() {{$property.Type.Type}} {
+func (s *gengoStateObject) Default{{$property.Name}}() {{$property.Type.Type}} {
 	return {{$property.Default}}
 }
 
 // Reset{{$property.Name}} resets {{$property.Name}} to the default value
-func (s *cbgenStateObject) Reset{{$property.Name}}() {
+func (s *gengoStateObject) Reset{{$property.Name}}() {
 	s.Set{{$property.Name}}(s.Default{{$property.Name}}())
 }
 {{end}}
 
 {{range $type := .Types}}
-func cbgenStateEncode{{$type.Name}}(o {{$type.Type}}) ([]byte, error) {
+func gengoStateEncode{{$type.Name}}(o {{$type.Type}}) ([]byte, error) {
 	var buf bytes.Buffer
 	err := gob.NewEncoder(&buf).Encode(o)
 	if err != nil {
@@ -102,7 +102,7 @@ func cbgenStateEncode{{$type.Name}}(o {{$type.Type}}) ([]byte, error) {
 	}
 	return buf.Bytes(), nil
 }
-func cbgenStateDecode{{$type.Name}}(data []byte) (*{{$type.Type}}, error) {
+func gengoStateDecode{{$type.Name}}(data []byte) (*{{$type.Type}}, error) {
 	w := new({{$type.Type}})
 	reader := bytes.NewReader(data)
 	dec := gob.NewDecoder(reader)

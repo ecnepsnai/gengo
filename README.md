@@ -1,30 +1,50 @@
-# cbgen
+# GenGo
 
-CBgen is yet another Golang code generator, because there aren't enough of those already.
+GenGo is yet another Golang code generator, _because there aren't enough of those already._
 
-It can generate the following things: github.com/ecnepsnai/ds implementations, directory utilities, enums,
-gob registrations, a state store, a statistics tracker, github.com/ecnepsnai/store implementations, and version tracking.
+GenGo supports multiple different modules:
 
-What's CB stand for? *I don't remember.*
+- Implementations of:
+    - github.com/ecnepsnai/ds
+    - github.com/ecnepsnai/stats
+    - github.com/ecnepsnai/store
+- Directory & filesystem utilities
+- Enums, including TypeScript definitions
+- Gob registration
+- State storage system
+- Statistics system
 
-# Usage
+## Usage
 
 ```
-Usage: cbgen [Options]
--n --name <name>        Package name, defaults to 'main'
--c --config-dir <dir>   Config dir, defaults to current dir
--o --output-dir <dir>   Output dir, defaults to current dir
+Usage: gengo [Options]
+-n --name <name>           Package name, defaults to 'main'
+-c --config-dir <dir>      Config dir, defaults to current dir
+-g --go-output-dir <dir>   Output dir for go files, defaults to current dir
+-t --ts-output-dir <dir>   Output dir for ts files, defaults to current dir
+-q --quiet                 Don't print out names of generated files
 ```
 
-Ensure that your $GOBIN is in your $PATH and run `cbgen` in the directory where your configuration JSON files are.
+Ensure that your $GOBIN is in your $PATH and run `gengo` in the directory where your configuration JSON files are.
 
-## Data Store
+## Configuration
+
+Aside from the command-line parameters, a configuration file `gengo.json` or `gengo.yaml` may be provided in the configuration directory to control the generation and output process.
+
+|Property|Type|Description|
+|-|-|-|
+|`minimum_version`|String|The minimum supported version of gengo for this project in the format of `v1.2.3`. If omitted no version check is performed.|
+|`file_prefix`|String|A prefix to attach to all generated files. Defaults to `gengo_`. Set to an empty string to remove the prefix.|
+
+## Modules
+
+### Data Store
 
 Data Stores provide an implementation of the github.com/ecnepsnai/ds package.
 
-### Config
+#### Config
 
-Options go into the `data_store.json` file.
+Options go into the `data_store.json` or `data_store.yaml` file.
 
 |Property|Type|Description|
 |-|-|-|
@@ -32,7 +52,7 @@ Options go into the `data_store.json` file.
 |`object`|String|The golang object to register to the store|
 |`unordered`|Bool|Optional, if the table should not be ordered. Defaults to false.|
 
-**Example:**
+##### Example
 
 ```json
 [
@@ -44,20 +64,20 @@ Options go into the `data_store.json` file.
 ]
 ```
 
-### Output
+#### Output
 
-- `func dataStoreSetup()`: Method to set up all data stores
+- `func dataStoreSetup(storageDir string)`: Method to set up all data stores.
 - `func dataStoreTeardown()`: Method to tear down all data stores
 - `type <name_lowercase>StoreObject struct{ table *ds.Table }`: Type associated with the store
 - `var <name_titlecase>Store: <name_lowercase>StoreObject`: Global variable associated with the store, set up when `dataStoreSetup()` is called
 
-## Directories
+### Directories
 
 Directories provides utilities for data directory management.
 
-### Config
+#### Config
 
-Options go into the `directory.json` file.
+Options go into the `directory.json` or `directory.yaml` file.
 
 |Property|Type|Description|
 |-|-|-|
@@ -67,7 +87,7 @@ Options go into the `directory.json` file.
 |`required`|Bool|Optional, if this directory must already exist. If false, the directory will be created for you|
 |`subdirs`|Array|Optional subdirectories under this parent|
 
-**Example:**
+##### Example
 
 ```json
 [
@@ -85,7 +105,7 @@ Options go into the `directory.json` file.
 ]
 ```
 
-### Output
+#### Output
 
 - `var operatingDirectory: String`: Global variable of the operating directory of the application
 - `var dataDirectory: String`: Global variable of the data directory of the application
@@ -95,13 +115,13 @@ Options go into the `directory.json` file.
 - `func MakeDirectoryIfNotExist(directoryPath string)`: Method to create a directory if it does not already exist
 - `func FileExists(filePath string) bool`: Method to check if a file exists
 
-## Enums
+### Enums
 
 Enums are enums, the one thing that go really needs.
 
-### Config
+#### Config
 
-Options go into the `enum.json` file.
+Options go into the `enum.json` or `enum.yaml` file.
 
 |Property|Type|Description|
 |-|-|-|
@@ -114,7 +134,7 @@ Options go into the `enum.json` file.
 |`values.description`|String|Optionally provide a description for this value|
 |`values.value`|String|The value of this enum as it would be seen in Golang code. I.E. if it's a string include quotation marks|
 
-**Example:**
+##### Example
 
 ```json
 [
@@ -144,9 +164,9 @@ Options go into the `enum.json` file.
 
 _Note how the values include quotes._
 
-### Output
+#### Output
 
-#### Go
+##### Go
 
 - `const ( <enum name><value key> = <value> ...)`: A const of all possible enum values for this enum.
 - `var All<enum name> = []<enum type>`: An array of all enum values.
@@ -154,26 +174,26 @@ _Note how the values include quotes._
 - `func Is<enum name>(q <enum type>) bool`: A method to validate that the given value is a valid enum value.
 - `func ForEach<enum name>(m func(value <enum type>))`: A convience method to iterate over each enum value
 
-#### TypeScript
+##### TypeScript
 
 - `export enum <enum name>`: An exported enum definition for this enum.
 - `export function <enum name>All()`: An exported function that returns an array of all enum values.
 - `export function <enum name>Config()`: An exported function that returns an array of objects that describe the enum.
 
-## Gobs
+### Gobs
 
 Gobs provide an easy way to register many objects with gob in one place, and to prevent a panic if they're already registered.
 
-### Config
+#### Config
 
-Options go into the `gob.json` file.
+Options go into the `gob.json` or `gob.yaml` file.
 
 |Property|Type|Description|
 |-|-|-|
 |`type`|String|The golang type to register, including the `{}`|
 |`import`|String|The import path for this type. Imports are deduplicated|
 
-**Example:**
+##### Example
 
 ```json
 [
@@ -184,17 +204,17 @@ Options go into the `gob.json` file.
 ]
 ```
 
-### Output
+#### Output
 
 - `func gobSetup()`: Method to register all of your gob types
 
-## State Store
+### State Store
 
 State Store is a simple store interface for persisting configuration or other properties.
 
-### Config
+#### Config
 
-Options go into the `state.json` file.
+Options go into the `state.json` or `state.yaml` file.
 
 |Property|Type|Description|
 |-|-|-|
@@ -203,7 +223,7 @@ Options go into the `state.json` file.
 |`default`|String|The default value of this property as it would be seen in Golang code. I.E. if it's a string include quotation marks|
 |`import`|String|The import path for this type. Imports are deduplicated|
 
-**Example:**
+##### Example
 
 ```json
 [
@@ -215,21 +235,21 @@ Options go into the `state.json` file.
 ]
 ```
 
-### Output
+#### Output
 
-- `var State *cbgenStateObject`: The global state object
-- `func stateSetup()`: Method to set up the state store
-- `func (s *cbgenStateObject) Close()`: Method to close the state store
-- `func (s *cbgenStateObject) Get<property name>() <property type>`: Method to get the property value, or the default value. Threadsafe.
-- `func (s *cbgenStateObject) Set<property name>(value <property type>)`: Method to set the property value. Threadsafe.
+- `var State *gengoStateObject`: The global state object
+- `func stateSetup(storageDir string)`: Method to set up the state store
+- `func (s *gengoStateObject) Close()`: Method to close the state store
+- `func (s *gengoStateObject) Get<property name>() <property type>`: Method to get the property value, or the default value. Threadsafe.
+- `func (s *gengoStateObject) Set<property name>(value <property type>)`: Method to set the property value. Threadsafe.
 
-## Stats
+### Stats
 
 Stats provides an interface to the github.com/ecnepsnai/stats package.
 
-### Config
+#### Config
 
-Options go into the `stats.json` file.
+Options go into the `stats.json` or `stats.yaml` file.
 
 |Property|Type|Description|
 |-|-|-|
@@ -244,7 +264,7 @@ Options go into the `stats.json` file.
 |`timers.name`|String|The name of this timer|
 |`timers.description`|String|The description of this timer|
 
-**Example:**
+##### Example
 
 ```json
 {
@@ -270,27 +290,27 @@ Options go into the `stats.json` file.
 }
 ```
 
-### Output
+#### Output
 
-- `type cbgenStatsCounters struct { <counter name> *stats.Counter ... }`: All of your counter
-- `type cbgenStatsTimedCounters struct { <counter name> *stats.TimedCounter ... }`: All of your timed counters
-- `type cbgenStatsTimers struct { <timer name> *stats.Timer ... }`: All of your timers
-- `var Stats *cbgenStatsObject`: The global stats object
+- `type gengoStatsCounters struct { <counter name> *stats.Counter ... }`: All of your counter
+- `type gengoStatsTimedCounters struct { <counter name> *stats.TimedCounter ... }`: All of your timed counters
+- `type gengoStatsTimers struct { <timer name> *stats.Timer ... }`: All of your timers
+- `var Stats *gengoStatsObject`: The global stats object
 - `func statsSetup()`: Method to set up the stats interface
-- `func (s *cbgenStatsObject) Reset()`: Reset all counters to their default values
-- `func (s *cbgenStatsObject) GetCounterValues()`: Get a map of all counter values
-- `func (s *cbgenStatsObject) GetTimedCounterValues()`: Get a map of all timed counter values
-- `func (s *cbgenStatsObject) GetTimedCounterValuesFrom(d time.Duration)`: Get a map of all timed counter values from d
-- `func (s *cbgenStatsObject) GetTimerAverages()`: Get a map of all timer averages
-- `func (s *cbgenStatsObject) GetTimerValues()`: Get a map of all timer values
+- `func (s *gengoStatsObject) Reset()`: Reset all counters to their default values
+- `func (s *gengoStatsObject) GetCounterValues()`: Get a map of all counter values
+- `func (s *gengoStatsObject) GetTimedCounterValues()`: Get a map of all timed counter values
+- `func (s *gengoStatsObject) GetTimedCounterValuesFrom(d time.Duration)`: Get a map of all timed counter values from d
+- `func (s *gengoStatsObject) GetTimerAverages()`: Get a map of all timer averages
+- `func (s *gengoStatsObject) GetTimerValues()`: Get a map of all timer values
 
-## Store
+### Store
 
 Store is like Data Store, but less complex and provides less features.
 
-### Config
+#### Config
 
-Options go into the `store.json` file.
+Options go into the `store.json` or `store.yaml` file.
 
 |Property|Type|Description|
 |-|-|-|
@@ -299,7 +319,7 @@ Options go into the `store.json` file.
 |`gobs`|Array|Optional, any extra types to register with gob|
 |`extra_imports`|Array|Optional, any extra imports include for those types|
 
-**Example:**
+##### Example
 
 ```json
 [
@@ -309,12 +329,8 @@ Options go into the `store.json` file.
 ]
 ```
 
-### Output
+#### Output
 
 - `var <store name>Store = <store name>StoreObject{ Lock: &sync.Mutex{} }`: Global reference to your store
-- `func storeSetup()`: Method to set up your stores
+- `func storeSetup(storageDir string)`: Method to set up your stores
 - `func storeTeardown()`: Method to tear down your stores
-
-## Version
-
-If you call cbgen with the `-v <version>` argument, it will a version file with a global variable to the version.

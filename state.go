@@ -1,29 +1,33 @@
 package main
 
 import (
-	"log"
+	"fmt"
 	"os"
 	"path"
 	"sort"
 	"strings"
 	"text/template"
 
-	"github.com/ecnepsnai/cbgen/templates"
+	"github.com/ecnepsnai/gengo/templates"
 )
 
-const stateFileName = "cbgen_state.go"
+type TStateGenerator struct{}
 
-// GenerateState generates the state store
-func GenerateState(options Options) {
+var StateGenerator = &TStateGenerator{}
+
+func (g *TStateGenerator) Generate(options Options) (*GeneratorResult, error) {
+	stateFileName := fmt.Sprintf("%sstate.go", options.FilePrefix)
+
 	var states []StateProperty
 	if !loadConfig(options.ConfigDir, "state", &states) {
-		return
+		return nil, nil
 	}
 
 	t, _ := template.New("state").Parse(templates.StateGo)
-	f, err := os.OpenFile(path.Join(options.OutputDir, stateFileName+"~"), os.O_WRONLY|os.O_TRUNC|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path.Join(options.TempDir, stateFileName), os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
-		log.Fatalf("Error generating state file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", stateFileName, err.Error())
+		return nil, err
 	}
 	defer f.Close()
 
@@ -68,27 +72,28 @@ func GenerateState(options Options) {
 	}
 
 	err = t.ExecuteTemplate(f, "main", struct {
-		CodeGen     MetaInfo
+		GenGo       MetaInfo
 		PackageName string
 		Properties  []StateProperty
 		Types       []stateType
 		Imports     []string
 	}{
-		CodeGen:     options.MetaInfo,
+		GenGo:       options.MetaInfo,
 		PackageName: options.PackageName,
 		Properties:  states,
 		Types:       types,
 		Imports:     imports,
 	})
 	if err != nil {
-		log.Fatalf("Error generating state file: %s", err.Error())
-	}
-	err = os.Rename(path.Join(options.OutputDir, stateFileName+"~"), path.Join(options.OutputDir, stateFileName))
-	if err != nil {
-		log.Fatalf("Error generating state file: %s", err.Error())
+		fmt.Fprintf(os.Stderr, "Error generating %s: %s", stateFileName, err.Error())
+		return nil, err
 	}
 
-	goFmt(path.Join(options.OutputDir, stateFileName))
+	return &GeneratorResult{
+		GoFiles: []string{
+			stateFileName,
+		},
+	}, nil
 }
 
 // StateProperty describes a state property

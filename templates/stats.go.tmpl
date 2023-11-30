@@ -1,6 +1,6 @@
 {{block "main" .}}package {{.PackageName}}
 
-// This file is was generated automatically by Codegen {{.CodeGen.Version}}
+// This file is was generated automatically by GenGo {{.GenGo.Version}}
 // Do not make changes to this file as they will be lost
 
 import (
@@ -9,77 +9,77 @@ import (
 	"github.com/ecnepsnai/stats"
 )
 
-type cbgenStatsCounters struct { {{range $counter := .Stats.Counters}}
+type gengoStatsCounters struct { {{range $counter := .Stats.Counters}}
 	{{$counter.Name}} *stats.Counter {{end}}
 }
 
-type cbgenStatsTimedCounters struct { {{range $timedCounter := .Stats.TimedCounters}}
+type gengoStatsTimedCounters struct { {{range $timedCounter := .Stats.TimedCounters}}
 	{{$timedCounter.Name}} *stats.TimedCounter {{end}}
 }
 
-type cbgenStatsTimers struct { {{range $timer := .Stats.Timers}}
+type gengoStatsTimers struct { {{range $timer := .Stats.Timers}}
 	{{$timer.Name}} *stats.Timer {{end}}
 }
 
-type cbgenStatsObject struct {
-	Counters      cbgenStatsCounters
-	TimedCounters cbgenStatsTimedCounters
-	Timers        cbgenStatsTimers
+type gengoStatsObject struct {
+	Counters      gengoStatsCounters
+	TimedCounters gengoStatsTimedCounters
+	Timers        gengoStatsTimers
 }
 
 // Stats the global stats object
-var Stats *cbgenStatsObject
+var Stats *gengoStatsObject
 
 // statsSetup setup the stats object
 func statsSetup() {
-	Stats = &cbgenStatsObject{
-		Counters: cbgenStatsCounters{ {{range $counter := .Stats.Counters}}
+	Stats = &gengoStatsObject{
+		Counters: gengoStatsCounters{ {{range $counter := .Stats.Counters}}
 			{{$counter.Name}}: stats.NewCounter(), {{end}}
 		},
-		TimedCounters: cbgenStatsTimedCounters{ {{range $counter := .Stats.TimedCounters}}
+		TimedCounters: gengoStatsTimedCounters{ {{range $counter := .Stats.TimedCounters}}
 			{{$counter.Name}}: stats.NewTimedCounter({{$counter.MaxMinutes}} * time.Minute), {{end}}
 		},
-		Timers: cbgenStatsTimers{ {{range $timer := .Stats.Timers}}
+		Timers: gengoStatsTimers{ {{range $timer := .Stats.Timers}}
 			{{$timer.Name}}: stats.NewTimer(15), {{end}}
 		},
 	}
 }
 
 // Reset reset all volatile stats
-func (s *cbgenStatsObject) Reset() {
+func (s *gengoStatsObject) Reset() {
 	statsSetup()
 }
 
 // GetCounterValues get a map of current counters
-func (s *cbgenStatsObject) GetCounterValues() map[string]uint64 {
+func (s *gengoStatsObject) GetCounterValues() map[string]uint64 {
 	return map[string]uint64{ {{range $counter := .Stats.Counters}}
 		"{{$counter.Name}}": s.Counters.{{$counter.Name}}.Get(), {{end}}
 	}
 }
 
 // GetTimedCounterValues get a map of all timed counter values
-func (s *cbgenStatsObject) GetTimedCounterValues() map[string]uint64 {
+func (s *gengoStatsObject) GetTimedCounterValues() map[string]uint64 {
 	return map[string]uint64{ {{range $counter := .Stats.TimedCounters}}
 		"{{$counter.Name}}": s.TimedCounters.{{$counter.Name}}.GetAll(), {{end}}
 	}
 }
 
 // GetTimedCounterValuesFrom get a map of all timed counter values
-func (s *cbgenStatsObject) GetTimedCounterValuesFrom(d time.Duration) map[string]uint64 {
+func (s *gengoStatsObject) GetTimedCounterValuesFrom(d time.Duration) map[string]uint64 {
 	return map[string]uint64{ {{range $counter := .Stats.TimedCounters}}
 		"{{$counter.Name}}": s.TimedCounters.{{$counter.Name}}.GetLast(d), {{end}}
 	}
 }
 
 // GetTimerAverages get the average times for all timers
-func (s *cbgenStatsObject) GetTimerAverages() map[string]time.Duration {
+func (s *gengoStatsObject) GetTimerAverages() map[string]time.Duration {
 	return map[string]time.Duration{ {{range $timer := .Stats.Timers}}
 		"{{$timer.Name}}": s.Timers.{{$timer.Name}}.GetAverage(), {{end}}
 	}
 }
 
 // GetTimerValues get all vaues for all timers
-func (s *cbgenStatsObject) GetTimerValues() map[string][]time.Duration {
+func (s *gengoStatsObject) GetTimerValues() map[string][]time.Duration {
 	return map[string][]time.Duration{ {{range $timer := .Stats.Timers}}
 		"{{$timer.Name}}": s.Timers.{{$timer.Name}}.GetAll(), {{end}}
 	}

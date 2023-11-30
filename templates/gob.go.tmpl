@@ -1,6 +1,6 @@
 {{block "main" .}}package {{.PackageName}}
 
-// This file is was generated automatically by Codegen {{.CodeGen.Version}}
+// This file is was generated automatically by GenGo {{.GenGo.Version}}
 // Do not make changes to this file as they will be lost
 
 import (
@@ -10,19 +10,19 @@ import (
     {{end}}
 )
 
-func cbgenGobRegisterType(o interface{}) {
-	defer cbgenGobPanicRecovery()
+func gengoGobRegisterType(o interface{}) {
+	defer gengoGobPanicRecovery()
 	gob.Register(o)
 }
 
-func cbgenGobPanicRecovery() {
+func gengoGobPanicRecovery() {
 	recover()
 }
 
 // gobSetup register gob types
 func gobSetup() {
     {{range $gob := .Gobs}}
-    cbgenGobRegisterType({{$gob.Type}})
+    gengoGobRegisterType({{$gob.Type}})
     {{end}}
 }
 
