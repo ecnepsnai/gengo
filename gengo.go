@@ -9,7 +9,7 @@ import (
 )
 
 // Version the current version of GenGo
-var Version = "v1.14.1"
+var Version = "v1.15.0"
 
 func main() {
 	if len(os.Args) <= 1 {

@@ -10,13 +10,13 @@ import (
 )
 
 {{range $store := .Stores}}
-type {{$store.LowercaseName}}StoreObject struct { Table *ds.Table }
+type {{$store.LowercaseName}}StoreObject struct { Table *ds.Table[{{$store.Object}}] }
 
 // {{$store.TitlecaseName}}Store the global {{$store.LowercaseName}} store
 var {{$store.TitlecaseName}}Store = {{$store.LowercaseName}}StoreObject{}
 
 func gengoDataStoreRegister{{$store.TitlecaseName}}Store(storageDir string) {
-	table, err := ds.Register({{$store.Object}}{}, path.Join(storageDir, "{{$store.LowercaseName}}.db"), &ds.Options{ {{if $store.Unordered}}DisableSorting: true{{end}} })
+	table, err := ds.Register[{{$store.Object}}](path.Join(storageDir, "{{$store.LowercaseName}}.db"), &ds.Options{ {{if $store.Unordered}}DisableSorting: true{{end}} })
 	if err != nil {
 		log.Fatal("Error registering {{$store.LowercaseName}} store: %s", err.Error())
 	}
